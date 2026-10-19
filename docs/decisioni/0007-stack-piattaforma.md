@@ -10,7 +10,7 @@ La piattaforma deve ricevere i pacchetti CoAP delle centraline, gestire aziende,
 
 - **Un monorepo TypeScript** (pnpm + Turborepo) con quattro processi: `ingest` (CoAP), `api` (Hono), `worker` (pg-boss) e `models` (Python, senza accesso in scrittura al database).
 - **PostgreSQL 17 + TimescaleDB + PostGIS** come unico archivio. Le misure stanno in hypertable con chiave `(station_id, seq)`, che garantisce l'idempotenza. Medie orarie e giornaliere sono aggregati continui. Niente Redis e niente code esterne: pg-boss usa PostgreSQL.
-- **Better Auth** per gli account: link via email e passkey, aziende con ruoli e inviti.
+- **Better Auth** per gli account: link via email e passkey. Aziende, ruoli e inviti in tabelle nostre (nota 0009).
 - **Una sola web app React** (Vite, TanStack Router e Query) con l'area utenti e l'area `/console`. Hanno in comune design system, grafici e mappa; il codice della console si carica solo per chi ha il ruolo giusto.
 - **Design con Impeccable**: `PRODUCT.md` e `DESIGN.md` nel repository, componenti shadcn/ui ridisegnati, Tailwind v4, uPlot per i grafici e MapLibre per la mappa 3D.
 - **Docker Compose su un VPS europeo**, con Caddy per HTTPS.

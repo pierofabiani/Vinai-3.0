@@ -106,7 +106,7 @@ Criteri: un solo linguaggio per server e web (TypeScript), pochi servizi da tene
 | API | Hono + Zod | rotte tipizzate, validazione, client tipizzato per la web app |
 | Database | PostgreSQL 17 + TimescaleDB + PostGIS | misure come hypertable, medie orarie e giornaliere già pronte, poligoni dei vigneti |
 | Migrazioni e query | SQL scritto a mano + postgres.js | hypertable, compressione e aggregati sono SQL di TimescaleDB (nota 0008) |
-| Autenticazione | Better Auth | link via email, passkey, aziende con ruoli e inviti, sessioni |
+| Autenticazione | Better Auth + tabelle nostre | link via email, passkey e sessioni con Better Auth; aziende, ruoli e inviti nostri (nota 0009) |
 | Job | pg-boss (coda su PostgreSQL) | nessun Redis da gestire |
 | Web app | React + Vite + TanStack Router + TanStack Query | una sola app con due aree: `/` utenti, `/console` amministrazione |
 | UI | Tailwind CSS v4, componenti shadcn/ui (Radix) ridisegnati sui nostri token | accessibilità di base già risolta, aspetto tutto nostro |
@@ -154,7 +154,7 @@ erDiagram
 
 | Tabella | Contenuto essenziale | Note |
 | --- | --- | --- |
-| `organization`, `member`, `user`, `invitation`, `passkey`, `session` | aziende, ruoli per azienda, utenti | gestite da Better Auth; il ruolo Amministratore/Tecnico è globale, gli altri sono per azienda |
+| `user`, `session`, `passkey` (Better Auth); `organization`, `membership`, `invitation` (nostre) | utenti, aziende, ruoli per azienda | il ruolo amministratore/tecnico è globale, gli altri sono per azienda (nota 0009) |
 | `vineyard` | nome, poligono (PostGIS), varietà, sesto d'impianto, anno, regione/provincia | la regione serve per i bollettini |
 | `station` | IMEI, chiave cifrata, stato (`lab`, `pronta`, `installata`, `attiva`, `dismessa`), vigneto, posizione, foto, firmware, ultima ricezione | la chiave si cifra con una chiave master che sta solo nelle variabili d'ambiente |
 | `measurement` (hypertable) | `station_id, time, seq, temp_c, hum_pct, press_hpa, wet_raw, wet_min, flags` in unità reali, `NULL` se il sensore è guasto | chiave primaria `(station_id, time, seq)`: l'idempotenza la garantisce il database (nota 0008) |

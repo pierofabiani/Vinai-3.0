@@ -12,19 +12,27 @@
     "start:worker": "node --env-file-if-exists=../.env dist/worker/main.js",
     "db:migrate": "tsx --env-file=../.env src/db/migrate-cli.ts",
     "sim": "tsx --env-file=../.env src/sim/cli.ts",
-    "start:migrate": "node --env-file-if-exists=../.env dist/db/migrate-cli.js"
+    "start:migrate": "node --env-file-if-exists=../.env dist/db/migrate-cli.js",
+    "seed:demo": "tsx --env-file=../.env src/sim/seed-demo.ts",
+    "posta": "tsx --env-file=../.env src/mail/print-outbox.ts"
   },
   "dependencies": {
+    "@better-auth/passkey": "^1.7.10",
     "@hono/node-server": "^2.1.5",
     "@vinai/protocol": "workspace:*",
+    "better-auth": "^1.7.10",
     "coap": "^1.6.0",
     "hono": "^4.13.13",
+    "nodemailer": "^10.1.6",
+    "pg": "^8.23.1",
     "pg-boss": "^12.38.0",
     "postgres": "^3.4.9",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.5"

@@ -1,21 +1,47 @@
-// Applicazione HTTP per la web app e la console.
-// Le dipendenze arrivano da fuori, così i test non hanno bisogno del database.
+// Applicazione HTTP per la web app e la console. I servizi arrivano da fuori (ApiDeps).
 import { Hono } from "hono";
-import type { DbStatus } from "../lib/db.js";
+import { HTTPException } from "hono/http-exception";
+import type { GlobalRole } from "../auth/auth.js";
+import type { ApiDeps, AppEnv } from "./context.js";
+import { consoleRoutes } from "./routes/console.js";
+import { userRoutes } from "./routes/user.js";
 
-export interface ApiDeps {
-  dbStatus: () => Promise<DbStatus>;
-}
+export function createApp(d: ApiDeps) {
+  const app = new Hono<AppEnv>().basePath("/api");
 
-export function createApp(deps: ApiDeps) {
-  return new Hono().basePath("/api").get("/health", async (c) => {
+  app.onError((err, c) => {
+    if (err instanceof HTTPException) return c.json({ error: err.message }, err.status);
+    console.error("[api]", err);
+    return c.json({ error: "Errore interno" }, 500);
+  });
+
+  app.get("/health", async (c) => {
     try {
-      const db = await deps.dbStatus();
-      return c.json({ ok: true, db });
+      return c.json({ ok: true, db: await d.dbStatus() });
     } catch {
       return c.json({ ok: false, db: null }, 503);
     }
   });
+
+  app.on(["GET", "POST"], "/auth/*", (c) => d.auth.handler(c.req.raw));
+
+  app.use("*", async (c, next) => {
+    const session = await d.auth.api.getSession({ headers: c.req.raw.headers });
+    const u = session?.user as
+      | { id: string; email: string; name: string; role?: string | null; banned?: boolean | null }
+      | undefined;
+    c.set(
+      "user",
+      u && !u.banned
+        ? { id: u.id, email: u.email, name: u.name, role: (u.role ?? "user") as GlobalRole }
+        : null,
+    );
+    await next();
+  });
+
+  app.route("/", userRoutes(d));
+  app.route("/console", consoleRoutes(d));
+  return app;
 }
 
 export type AppType = ReturnType<typeof createApp>;
