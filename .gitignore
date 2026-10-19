@@ -18,3 +18,13 @@ __pycache__/
 *.key
 # sistema
 .DS_Store
+# pnpm / turbo / vite
+.turbo/
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+# Impeccable: il motore si riscarica da solo, gli hook sono locali (npx impeccable install)
+.claude/skills/impeccable/scripts/bin/
+.claude/settings.local.json
+.impeccable/config.local.json

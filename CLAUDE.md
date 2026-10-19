@@ -23,9 +23,28 @@ Prima di cambiare un comportamento già deciso, leggi la nota di decisione relat
 
 ## Server, app, modelli
 
-- Server e app in TypeScript; modelli in Python.
+- Server e app in TypeScript; modelli in Python. Piano, stack e fasi: `docs/piattaforma.md` (nota 0007).
 - Il server è l'unico punto che scrive nel database. Ogni pacchetto si salva anche grezzo, per poterlo rielaborare.
 - I modelli delle malattie mostrano sempre il perché di un allarme. Nessun modello "a scatola nera" in produzione senza spiegazione.
+
+### Monorepo
+
+- pnpm + Turborepo. Dalla radice: `pnpm dev` (database Docker + api + ingest + worker + web app), `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`. Lint e formattazione con Biome.
+- Database di sviluppo: `infra/compose.dev.yml`, su `127.0.0.1:5442` (sulla 5432 di questo server gira un altro PostgreSQL: non toccarlo). Porte: api 8787, web 5173, CoAP UDP 5683.
+- Nuove dipendenze con script di installazione vanno aggiunte a `allowBuilds` in `pnpm-workspace.yaml` solo se servono davvero.
+
+### Server (`server/`)
+
+- Tre ingressi: `src/api` (Hono), `src/ingest` (CoAP), `src/worker` (pg-boss). In sviluppo `src/dev.ts` li avvia insieme.
+- Le dipendenze esterne (database, orologio, servizi) si passano alle funzioni: la logica si testa senza database.
+- `ingest` conferma (`acked_seq`) solo ciò che è già salvato nel database. Se il salvataggio fallisce, nessun ACK.
+- Il codec del pacchetto TypeScript deve passare i vettori d'oro generati dal firmware C.
+
+### App (`app/`)
+
+- Una sola web app con area utenti e area `/console`. React, Vite, TanStack Query, Tailwind v4.
+- Design con la skill Impeccable (`.claude/skills/impeccable`): `PRODUCT.md` descrive prodotto e utenti, `DESIGN.md` il sistema visivo (arriva in P3). Prima di una schermata nuova: `/impeccable shape`; prima del merge: `/impeccable critique` e `/impeccable audit`.
+- Testi dell'interfaccia in italiano. Verifica sempre a 375 px (telefono) e a 1440 px (computer), in tema scuro e in modalità campo.
 
 ## Prima di dire "fatto"
 

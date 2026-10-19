@@ -1,0 +1,27 @@
+name: piattaforma
+
+on:
+  push:
+    paths: ["server/**", "app/**", "packages/**", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "turbo.json", "biome.json", "tsconfig.base.json", ".github/workflows/platform.yml"]
+  pull_request:
+    paths: ["server/**", "app/**", "packages/**", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "turbo.json", "biome.json", "tsconfig.base.json", ".github/workflows/platform.yml"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint e formattazione
+        run: pnpm lint
+      - name: Controllo dei tipi
+        run: pnpm typecheck
+      - name: Test
+        run: pnpm test
+      - name: Build
+        run: pnpm build

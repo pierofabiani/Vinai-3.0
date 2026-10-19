@@ -9,8 +9,8 @@ Le centraline sono le schede **Hive Rev 1.1** già prodotte (PIC24FJ256GA704, mo
 | Cartella | Contenuto | Stato |
 | --- | --- | --- |
 | [`firmware/`](firmware/) | firmware della centralina, in C, con test sul PC | struttura e moduli core scritti e testati; parte legata alla scheda da completare al banco |
-| [`server/`](server/) | ricezione dei pacchetti CoAP, API, console di gestione (TypeScript) | da iniziare |
-| [`app/`](app/) | PWA per gli utenti (TypeScript, React) | da iniziare, prima il design |
+| [`server/`](server/) | ricezione dei pacchetti CoAP, API, console di gestione (TypeScript) | P0: scheletro di api, ingest e worker avviabile |
+| [`app/`](app/) | PWA per gli utenti e console (TypeScript, React) | P0: scheletro avviabile; prima delle schermate, il design (P3) |
 | [`models/`](models/) | modelli delle malattie e AI (Python) | da iniziare, con l'agronomo |
 | [`infra/`](infra/) | server, backup, monitoraggio | da iniziare |
 | [`docs/`](docs/) | architettura, piano, note di decisione | avviato |
@@ -22,10 +22,25 @@ Le centraline sono le schede **Hive Rev 1.1** già prodotte (PIC24FJ256GA704, mo
 - [Piattaforma: come la costruiamo](docs/piattaforma.md)
 - [Note di decisione](docs/decisioni/)
 
+## Avvio rapido (piattaforma)
+
+Servono Node.js 22, pnpm (`corepack enable`) e Docker.
+
+```
+cp .env.example .env
+pnpm install
+pnpm dev
+```
+
+`pnpm dev` avvia il database (PostgreSQL + TimescaleDB + PostGIS su `127.0.0.1:5442`), api, porta CoAP e worker, e la web app su http://127.0.0.1:5173.
+
+Per il design si usa la skill [Impeccable](https://github.com/pbakaus/impeccable), già nel repository in `.claude/skills/`. Per attivarne gli hook sul proprio computer: `npx impeccable install --providers=claude --scope=project`.
+
 ## Test
 
 ```
-make -C firmware test
+make -C firmware test   # firmware
+pnpm lint && pnpm typecheck && pnpm test && pnpm build   # piattaforma
 ```
 
 Ogni modifica deve passare i test prima di essere unita (vedi `.github/workflows/`).

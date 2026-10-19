@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Segnaposto: i token veri (colori OKLCH, tipografia, movimento) arrivano
+   dalla direzione visiva scelta in P3 e finiranno in DESIGN.md. */
+:root {
+  color-scheme: dark;
+  background: oklch(0.17 0.02 260);
+  color: oklch(0.94 0.01 260);
+}
