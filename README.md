@@ -19,6 +19,7 @@ Le centraline sono le schede **Hive Rev 1.1** già prodotte (PIC24FJ256GA704, mo
 
 - [Architettura delle centraline e del backend](https://claude.ai/code/artifact/f68cf574-fe3f-4ea8-aa41-1021d73c7e07)
 - [Piano di progetto](https://claude.ai/code/artifact/828d4781-d888-48a0-ba60-3518f99d7e18)
+- [Piattaforma: come la costruiamo](docs/piattaforma.md)
 - [Note di decisione](docs/decisioni/)
 
 ## Test

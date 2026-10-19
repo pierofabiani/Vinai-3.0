@@ -2,6 +2,8 @@
 
 Ricezione dei pacchetti dalle centraline, API per l'app, console di gestione. TypeScript su Node.js, PostgreSQL con TimescaleDB.
 
+Piano dettagliato, stack e fasi: [`docs/piattaforma.md`](../docs/piattaforma.md).
+
 ## Da costruire (traccia B del piano)
 
 1. **Ricezione CoAP** (porta 5683/UDP): verifica della firma HMAC con la chiave della centralina, salvataggio idempotente per (centralina, sequenza), salvataggio del pacchetto grezzo, risposta con ultima sequenza salvata, ora e configurazione. Il formato è in [`firmware/src/core/packet.h`](../firmware/src/core/packet.h): i vettori di test del firmware vanno riusati qui.
