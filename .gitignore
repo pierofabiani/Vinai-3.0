@@ -1,0 +1,20 @@
+# build e test
+build/
+*.o
+*.elf
+# MPLAB X
+*.X/build/
+*.X/dist/
+*.X/nbproject/private/
+*.X/debug/
+# Node / Python
+node_modules/
+dist/
+__pycache__/
+.venv/
+*.pyc
+# segreti
+.env
+*.key
+# sistema
+.DS_Store
