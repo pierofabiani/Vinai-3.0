@@ -14,7 +14,8 @@
     "sim": "tsx --env-file=../.env src/sim/cli.ts",
     "start:migrate": "node --env-file-if-exists=../.env dist/db/migrate-cli.js",
     "seed:demo": "tsx --env-file=../.env src/sim/seed-demo.ts",
-    "posta": "tsx --env-file=../.env src/mail/print-outbox.ts"
+    "posta": "tsx --env-file=../.env src/mail/print-outbox.ts",
+    "proto:dati": "tsx --env-file=../.env src/sim/prototype-data.ts"
   },
   "dependencies": {
     "@better-auth/passkey": "^1.7.10",

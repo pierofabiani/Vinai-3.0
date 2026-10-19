@@ -6,6 +6,7 @@
     "src/test/**",
     "src/auth/gen-sql.ts",
     "src/sim/seed-demo.ts",
-    "src/mail/print-outbox.ts"
+    "src/mail/print-outbox.ts",
+    "src/sim/prototype-data.ts"
   ]
 }

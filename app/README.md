@@ -19,6 +19,10 @@ Una sola web app: area utenti (PWA) e area `/console` per amministratore e tecni
 
 L'aspetto è **provvisorio**: token in `src/index.css`, componenti in `src/components/ui.tsx`. La direzione visiva vera si sceglie in P3 con Impeccable e sostituisce i token in un solo punto. Le regole già seguite: stato sempre con icona ed etichetta, una serie per grafico con tabella dei valori, tutto verificato a 375 e 1440 px, tema chiaro e scuro dal sistema.
 
+## Prototipi di design (P3)
+
+`/prototipi`: le due direzioni visive candidate (Carta IGM e Verderame) per Oggi, Vigneto e Console › Flotta, su un'istantanea dei dati del simulatore (`public/prototipi/dati.json`, generata da `pnpm --filter @vinai/server proto:dati`). Codice in `src/proto/`, stili chiusi in `.igm` e `.vrd`, caricati solo su quelle pagine. Brief e scelte: `docs/design/p3-direzioni.md`. Dopo la scelta i prototipi diventano le schermate vere e questa cartella si toglie.
+
 ## Prove nel browser
 
 ```

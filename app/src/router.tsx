@@ -2,6 +2,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  lazyRouteComponent,
   Navigate,
   Outlet,
   useLocation,
@@ -100,7 +101,60 @@ const users = createRoute({ getParentRoute: () => consoleRoute, path: "/utenti",
 const audit = createRoute({ getParentRoute: () => consoleRoute, path: "/registro", component: Audit });
 const outbox = createRoute({ getParentRoute: () => consoleRoute, path: "/posta", component: Outbox });
 
+// Prototipi di design P3 (pubblici: solo dati d'esempio), caricati a parte
+const proto = (name: "ProtoIndex" | "OggiA" | "VignetoA" | "FlottaA" | "OggiB" | "VignetoB" | "FlottaB") =>
+  lazyRouteComponent(() => import("./proto"), name);
+const protoSearch = (s: Record<string, unknown>) => ({
+  n: typeof s.n === "string" || typeof s.n === "number" ? String(s.n) : undefined,
+});
+const protoIndex = createRoute({
+  getParentRoute: () => root,
+  path: "/prototipi",
+  component: proto("ProtoIndex"),
+});
+const protoA = createRoute({
+  getParentRoute: () => root,
+  path: "/prototipi/a/oggi",
+  component: proto("OggiA"),
+  validateSearch: protoSearch,
+});
+const protoAV = createRoute({
+  getParentRoute: () => root,
+  path: "/prototipi/a/vigneto/$id",
+  component: proto("VignetoA"),
+  validateSearch: protoSearch,
+});
+const protoAF = createRoute({
+  getParentRoute: () => root,
+  path: "/prototipi/a/flotta",
+  component: proto("FlottaA"),
+});
+const protoB = createRoute({
+  getParentRoute: () => root,
+  path: "/prototipi/b/oggi",
+  component: proto("OggiB"),
+  validateSearch: protoSearch,
+});
+const protoBV = createRoute({
+  getParentRoute: () => root,
+  path: "/prototipi/b/vigneto/$id",
+  component: proto("VignetoB"),
+  validateSearch: protoSearch,
+});
+const protoBF = createRoute({
+  getParentRoute: () => root,
+  path: "/prototipi/b/flotta",
+  component: proto("FlottaB"),
+});
+
 const routeTree = root.addChildren([
+  protoIndex,
+  protoA,
+  protoAV,
+  protoAF,
+  protoB,
+  protoBV,
+  protoBF,
   login,
   invite,
   home,
