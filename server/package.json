@@ -9,10 +9,14 @@
     "test": "vitest run",
     "start:api": "node --env-file-if-exists=../.env dist/api/main.js",
     "start:ingest": "node --env-file-if-exists=../.env dist/ingest/main.js",
-    "start:worker": "node --env-file-if-exists=../.env dist/worker/main.js"
+    "start:worker": "node --env-file-if-exists=../.env dist/worker/main.js",
+    "db:migrate": "tsx --env-file=../.env src/db/migrate-cli.ts",
+    "sim": "tsx --env-file=../.env src/sim/cli.ts",
+    "start:migrate": "node --env-file-if-exists=../.env dist/db/migrate-cli.js"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.5",
+    "@vinai/protocol": "workspace:*",
     "coap": "^1.6.0",
     "hono": "^4.13.13",
     "pg-boss": "^12.38.0",

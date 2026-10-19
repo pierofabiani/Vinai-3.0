@@ -2,9 +2,9 @@ name: firmware
 
 on:
   push:
-    paths: ["firmware/**", ".github/workflows/firmware.yml"]
+    paths: ["firmware/**", "packages/protocol/vectors/**", ".github/workflows/firmware.yml"]
   pull_request:
-    paths: ["firmware/**", ".github/workflows/firmware.yml"]
+    paths: ["firmware/**", "packages/protocol/vectors/**", ".github/workflows/firmware.yml"]
 
 jobs:
   test:
@@ -13,6 +13,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test sul PC (simulatore, AddressSanitizer, UBSan)
         run: make -C firmware test
+      - name: Vettori d'oro per il server aggiornati
+        run: |
+          make -C firmware vectors
+          git diff --exit-code packages/protocol/vectors || (echo "packet.h/config.h cambiati: lanciare 'make -C firmware vectors' e fare il commit del JSON"; exit 1)
       - name: Controllo sintassi dei file solo-PIC
         run: gcc -std=c99 -Wall -Wextra -fsyntax-only firmware/src/app/net_sim7020.c firmware/src/app/main_pic.c
   # TODO(fase 1): job di compilazione con XC16 per Linux, quando la parte HAL del PIC sarà completa

@@ -11,3 +11,4 @@ Ogni nota dice cosa abbiamo scelto, perché e cosa comporta. Una scelta che camb
 | 0005 | [Pluviometro rimosso; bagnatura fogliare misurata in minuti](0005-pioggia-da-radar-bagnatura-in-minuti.md) | 2026-10-18 |
 | 0006 | [Orologio interno compensato in software](0006-orologio-compensato.md) | 2026-10-19 |
 | 0007 | [Stack della piattaforma: TypeScript, PostgreSQL + TimescaleDB, una web app con due aree](0007-stack-piattaforma.md) (proposta) | 2026-10-19 |
+| 0008 | [Regole dell'ingest e schema delle misure](0008-regole-ingest.md) | 2026-10-19 |

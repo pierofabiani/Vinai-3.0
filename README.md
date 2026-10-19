@@ -9,7 +9,8 @@ Le centraline sono le schede **Hive Rev 1.1** già prodotte (PIC24FJ256GA704, mo
 | Cartella | Contenuto | Stato |
 | --- | --- | --- |
 | [`firmware/`](firmware/) | firmware della centralina, in C, con test sul PC | struttura e moduli core scritti e testati; parte legata alla scheda da completare al banco |
-| [`server/`](server/) | ricezione dei pacchetti CoAP, API, console di gestione (TypeScript) | P0: scheletro di api, ingest e worker avviabile |
+| [`server/`](server/) | ricezione dei pacchetti CoAP, API, console di gestione (TypeScript) | P1: ingest CoAP con salvataggio, schema TimescaleDB, simulatore di flotta |
+| [`packages/protocol/`](packages/protocol/) | codec del protocollo in TypeScript, verificato sui vettori del firmware | P1: completo |
 | [`app/`](app/) | PWA per gli utenti e console (TypeScript, React) | P0: scheletro avviabile; prima delle schermate, il design (P3) |
 | [`models/`](models/) | modelli delle malattie e AI (Python) | da iniziare, con l'agronomo |
 | [`infra/`](infra/) | server, backup, monitoraggio | da iniziare |

@@ -33,6 +33,8 @@ src/
     net.h                trasporto astratto
     net_sim7020.c        trasporto sul modem reale (solo PIC)
     main_pic.c           main del PIC
+tools/
+  gen_vectors.c          vettori d'oro per il server: make vectors -> packages/protocol/vectors/firmware.json
 tests/
   test_core.c            test dei moduli core
   test_app.c             driver + scenari di giorni simulati con un server finto

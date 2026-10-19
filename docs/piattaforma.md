@@ -105,7 +105,7 @@ Criteri: un solo linguaggio per server e web (TypeScript), pochi servizi da tene
 | CoAP | libreria `coap` per Node, verificata contro i vettori di test del firmware | porta radio |
 | API | Hono + Zod | rotte tipizzate, validazione, client tipizzato per la web app |
 | Database | PostgreSQL 17 + TimescaleDB + PostGIS | misure come hypertable, medie orarie e giornaliere già pronte, poligoni dei vigneti |
-| ORM e migrazioni | Drizzle | schema in TypeScript, SQL scritto a mano per le parti Timescale |
+| Migrazioni e query | SQL scritto a mano + postgres.js | hypertable, compressione e aggregati sono SQL di TimescaleDB (nota 0008) |
 | Autenticazione | Better Auth | link via email, passkey, aziende con ruoli e inviti, sessioni |
 | Job | pg-boss (coda su PostgreSQL) | nessun Redis da gestire |
 | Web app | React + Vite + TanStack Router + TanStack Query | una sola app con due aree: `/` utenti, `/console` amministrazione |
@@ -157,7 +157,7 @@ erDiagram
 | `organization`, `member`, `user`, `invitation`, `passkey`, `session` | aziende, ruoli per azienda, utenti | gestite da Better Auth; il ruolo Amministratore/Tecnico è globale, gli altri sono per azienda |
 | `vineyard` | nome, poligono (PostGIS), varietà, sesto d'impianto, anno, regione/provincia | la regione serve per i bollettini |
 | `station` | IMEI, chiave cifrata, stato (`lab`, `pronta`, `installata`, `attiva`, `dismessa`), vigneto, posizione, foto, firmware, ultima ricezione | la chiave si cifra con una chiave master che sta solo nelle variabili d'ambiente |
-| `measurement` (hypertable) | `station_id, seq, time, temp_dC, hum_dPct, press_dhPa, wet_raw, wet_min, flags` | chiave primaria `(station_id, seq)`: l'idempotenza la garantisce il database |
+| `measurement` (hypertable) | `station_id, time, seq, temp_c, hum_pct, press_hpa, wet_raw, wet_min, flags` in unità reali, `NULL` se il sensore è guasto | chiave primaria `(station_id, time, seq)`: l'idempotenza la garantisce il database (nota 0008) |
 | `measurement_1h`, `measurement_1d` | aggregati continui: medie, minimi, massimi, minuti di bagnatura sommati | l'app legge quasi sempre da qui |
 | `health` (hypertable) | campi di `health_t` per ogni pacchetto | grafici di batteria e segnale nella console |
 | `raw_packet` | ora, IP sorgente, byte, esito (`ok`, `hmac`, `formato`, `sconosciuta`) | conservati 1 anno, poi compressi |
@@ -180,17 +180,17 @@ sequenceDiagram
   C->>I: CON POST /m (uplink firmato)
   I->>D: salva raw_packet
   I->>D: cerca centralina per IMEI, legge chiave
-  I->>I: verifica HMAC (scarta in silenzio se sbagliato)
+  I->>I: verifica HMAC (4.01 se sbagliato)
   I->>D: TRANSAZIONE: misure ON CONFLICT DO NOTHING, salute, last_seen
   I->>D: legge ultima seq salvata + configurazione da inviare
   I-->>C: ACK 2.04 (acked_seq, ora, cfg TLV, firma)
-  Note over I,D: se il database non risponde: nessun ACK, la centralina riprova
+  Note over I,D: se il database non risponde: 5.03, nessuna conferma, la centralina riprova
 ```
 
 Dettagli che contano:
 
 - La configurazione si invia solo se `desired_version > cfg_ver` della centralina **e** non è mai stata rifiutata.
-- Un HMAC sbagliato non riceve risposta: chi prova a indovinare non ottiene informazioni.
+- Firma sbagliata o centralina sconosciuta ricevono subito `4.01`, database non disponibile `5.03`: niente silenzio, che farebbe ritrasmettere la centralina per 90 secondi a radio accesa (nota 0008).
 - Il codec TypeScript del pacchetto si collauda con **vettori d'oro generati dal codice C del firmware**: un piccolo programma in `firmware/tests` scrive pacchetti di esempio in un file JSON, e il server deve leggerli e produrre risposte che il C accetta. Se cambia `packet.h` e non il server, il CI fallisce.
 
 ---

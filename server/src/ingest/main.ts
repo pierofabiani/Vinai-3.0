@@ -1,32 +1,50 @@
-// Porta radio: riceve i pacchetti CoAP delle centraline (UDP 5683).
-// Fase P0: il server risponde, ma non salva ancora nulla. Su /m risponde 5.03,
-// così una centralina vera non riceve conferma e tiene le misure in flash.
-// Decodifica, firma e salvataggio arrivano in P1 (docs/piattaforma.md, sezione 5).
+// Porta radio: riceve i pacchetti CoAP delle centraline (UDP 5683) e risponde con la conferma.
 import coap from "coap";
+import { connect, type Sql } from "../lib/db.js";
 import { loadEnv } from "../lib/env.js";
+import { parseMasterKey } from "../lib/keys.js";
+import { handleUplink, type IngestContext } from "./uplink.js";
 
-export function startIngest() {
+export interface IngestOptions {
+  sql?: Sql;
+  port?: number;
+  log?: (msg: string) => void;
+}
+
+export function startIngest(opts: IngestOptions = {}) {
   const env = loadEnv();
-  const server = coap.createServer({ type: "udp6" });
+  const ownSql = !opts.sql;
+  const sql = opts.sql ?? connect(env.DATABASE_URL);
+  const ctx: IngestContext = {
+    sql,
+    master: parseMasterKey(env.STATION_KEY_SECRET),
+    now: () => new Date(),
+    log: opts.log ?? ((m) => console.log(`[ingest] ${m}`)),
+  };
+  // Il salvataggio richiede qualche millisecondo: la risposta resta allegata all'ACK
+  // (un solo scambio radio) finché arriva entro 3 secondi.
+  const server = coap.createServer({ type: "udp6", piggybackReplyMs: 3000 });
   server.on("request", (req, res) => {
     const path = req.url.split("?")[0];
-    if (path === "/m" && req.method === "POST") {
-      console.log(
-        `[ingest] pacchetto da ${req.rsinfo.address}: ${req.payload.length} byte (non ancora salvato)`,
-      );
-      res.code = "5.03";
+    if (path !== "/m" || req.method !== "POST") {
+      res.code = "4.04";
       res.end();
       return;
     }
-    res.code = "4.04";
-    res.end();
+    const src = { address: req.rsinfo.address.replace(/^::ffff:/, ""), port: req.rsinfo.port };
+    void handleUplink(ctx, new Uint8Array(req.payload), src).then((out) => {
+      res.code = out.reply.code;
+      res.end(out.reply.code === "2.04" ? Buffer.from(out.reply.payload) : undefined);
+    });
   });
-  server.listen(env.COAP_PORT, () => {
-    console.log(`[ingest] CoAP in ascolto su UDP ${env.COAP_PORT}`);
-  });
-  return async () => {
+  const port = opts.port ?? env.COAP_PORT;
+  const ready = new Promise<void>((resolve) => server.listen(port, () => resolve()));
+  void ready.then(() => ctx.log(`CoAP in ascolto su UDP ${port}`));
+  const stop = async () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
+    if (ownSql) await sql.end();
   };
+  return Object.assign(stop, { ready });
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) startIngest();

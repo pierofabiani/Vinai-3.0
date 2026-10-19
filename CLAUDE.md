@@ -37,8 +37,11 @@ Prima di cambiare un comportamento già deciso, leggi la nota di decisione relat
 
 - Tre ingressi: `src/api` (Hono), `src/ingest` (CoAP), `src/worker` (pg-boss). In sviluppo `src/dev.ts` li avvia insieme.
 - Le dipendenze esterne (database, orologio, servizi) si passano alle funzioni: la logica si testa senza database.
-- `ingest` conferma (`acked_seq`) solo ciò che è già salvato nel database. Se il salvataggio fallisce, nessun ACK.
-- Il codec del pacchetto TypeScript deve passare i vettori d'oro generati dal firmware C.
+- `ingest` conferma (`acked_seq`) solo ciò che è già salvato nel database. Se il salvataggio fallisce, nessun ACK. Regole complete: nota 0008.
+- Il codec (`packages/protocol`) deve passare i vettori d'oro generati dal firmware C (`make -C firmware vectors`).
+- Dentro `sql.begin(...)` ogni query usa la transazione (`tx`), mai il pool: altrimenti sotto carico il pool si blocca.
+- Schema: migrazioni SQL in `server/migrations`, mai modificare una migrazione già applicata.
+- Ogni modifica a ingest o configurazioni si prova anche con il simulatore (`pnpm --filter @vinai/server sim`, con `pnpm dev` acceso).
 
 ### App (`app/`)
 
