@@ -1,67 +1,54 @@
+// Console nel mondo Verderame: testata verderame con schede, interruttore campo e profilo.
 import { Link, Outlet } from "@tanstack/react-router";
-import {
-  Building2,
-  FlaskConical,
-  Inbox,
-  type LucideIcon,
-  Map as MapIcon,
-  ScrollText,
-  User,
-  Users,
-} from "lucide-react";
-import { Brand } from "../../components/Brand";
+import { User } from "lucide-react";
+import { CampoToggle } from "../../components/CampoToggle";
 import { isAdmin, useMe } from "../../lib/session";
 
-const NAV: { to: string; label: string; icon: LucideIcon; admin?: boolean }[] = [
-  { to: "/console", label: "Flotta", icon: MapIcon },
-  { to: "/console/laboratorio", label: "Laboratorio", icon: FlaskConical },
-  { to: "/console/aziende", label: "Aziende", icon: Building2 },
-  { to: "/console/utenti", label: "Utenti", icon: Users, admin: true },
-  { to: "/console/registro", label: "Registro", icon: ScrollText, admin: true },
-  { to: "/console/posta", label: "Posta di prova", icon: Inbox, admin: true },
+const NAV: { to: string; label: string; admin?: boolean }[] = [
+  { to: "/console", label: "Flotta" },
+  { to: "/console/laboratorio", label: "Laboratorio" },
+  { to: "/console/aziende", label: "Aziende" },
+  { to: "/console/utenti", label: "Utenti", admin: true },
+  { to: "/console/registro", label: "Registro", admin: true },
+  { to: "/console/posta", label: "Posta di prova", admin: true },
 ];
 
 export function ConsoleLayout() {
   const me = useMe();
   const admin = isAdmin(me.data);
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[220px_1fr]">
-      <aside className="no-print border-b border-line-soft bg-sidebar lg:sticky lg:top-0 lg:h-dvh lg:border-r lg:border-b-0">
-        <div className="flex items-center justify-between px-4 py-4 lg:block">
-          <Brand />
-          <Link
-            to="/profilo"
-            className="flex items-center gap-1.5 text-sm text-ink-2 hover:text-ink lg:hidden"
+    <div className="min-h-dvh">
+      <header className="no-print bg-shell text-shell-ink">
+        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2.5">
+          <span className="text-[17px] font-bold tracking-tight">Vinai</span>
+          <nav
+            aria-label="Console"
+            className="order-3 -mx-1 flex w-full gap-1 overflow-x-auto pr-6 [mask-image:linear-gradient(to_right,#000_85%,transparent)] md:order-none md:w-auto md:pr-0 md:[mask-image:none]"
           >
-            <User className="size-4" aria-hidden /> Profilo
-          </Link>
-        </div>
-        <nav
-          className="flex gap-1 overflow-x-auto px-2 pb-2 lg:mt-4 lg:flex-col lg:overflow-visible"
-          aria-label="Console"
-        >
-          {NAV.filter((n) => !n.admin || admin).map((n) => (
+            {NAV.filter((n) => !n.admin || admin).map((n) => (
+              <Link
+                key={n.to}
+                to={n.to}
+                activeOptions={{ exact: n.to === "/console" }}
+                className="shrink-0 rounded-md px-2.5 py-1.5 text-[15px] opacity-85 transition-colors duration-150 hover:bg-shell-ink/10 hover:opacity-100 data-[status=active]:bg-shell-ink/15 data-[status=active]:font-semibold data-[status=active]:opacity-100"
+              >
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="ml-auto flex items-center gap-3">
+            <CampoToggle />
             <Link
-              key={n.to}
-              to={n.to}
-              activeOptions={{ exact: n.to === "/console" }}
-              className="flex shrink-0 items-center gap-2.5 rounded-md px-3 py-2 text-sm text-ink-2 transition-colors duration-150 hover:bg-panel-2 hover:text-ink data-[status=active]:bg-panel-2 data-[status=active]:font-medium data-[status=active]:text-ink"
+              to="/profilo"
+              className="inline-flex items-center gap-1.5 text-sm opacity-90 hover:opacity-100"
             >
-              <n.icon className="size-4" aria-hidden />
-              {n.label}
+              <User className="size-4" aria-hidden />
+              <span className="hidden max-w-[16ch] truncate sm:inline">{me.data?.user?.name}</span>
             </Link>
-          ))}
-        </nav>
-        <div className="absolute bottom-0 hidden w-[220px] border-t border-line-soft px-4 py-3 lg:block">
-          <Link to="/profilo" className="block text-sm text-ink-2 hover:text-ink">
-            <span className="block truncate font-medium text-ink">{me.data?.user?.name}</span>
-            <span className="block truncate text-xs">
-              {me.data?.user?.role === "admin" ? "Amministratore" : "Tecnico"}
-            </span>
-          </Link>
+          </div>
         </div>
-      </aside>
-      <main className="min-w-0 px-4 py-6 lg:px-8 lg:py-8">
+      </header>
+      <main className="mx-auto min-w-0 max-w-[1400px] px-4 py-7 lg:py-8">
         <Outlet />
       </main>
     </div>

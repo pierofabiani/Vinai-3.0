@@ -3,7 +3,7 @@
 import { useQueries } from "@tanstack/react-query";
 import { Link, Navigate } from "@tanstack/react-router";
 import { User } from "lucide-react";
-import { Brand } from "../components/Brand";
+import { CampoToggle } from "../components/CampoToggle";
 import { Empty, Panel, SkeletonRows, StatusLabel } from "../components/ui";
 import { api } from "../lib/api";
 import { ago, num } from "../lib/format";
@@ -35,55 +35,63 @@ export function Home() {
   });
   if (me.data && isStaff(me.data)) return <Navigate to="/console" />;
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      <header className="mb-8 flex items-center justify-between">
-        <Brand />
-        <Link to="/profilo" className="flex items-center gap-1.5 text-sm text-ink-2 hover:text-ink">
-          <User className="size-4" aria-hidden /> {me.data?.user?.name}
-        </Link>
+    <div>
+      <header className="bg-shell text-shell-ink">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-2.5">
+          <span className="text-[17px] font-bold tracking-tight">Vinai</span>
+          <div className="flex items-center gap-3">
+            <CampoToggle />
+            <Link to="/profilo" className="flex items-center gap-1.5 text-sm opacity-90 hover:opacity-100">
+              <User className="size-4" aria-hidden />
+              <span className="hidden sm:inline">{me.data?.user?.name}</span>
+            </Link>
+          </div>
+        </div>
       </header>
-      {me.data?.memberships.length === 0 ? (
-        <Empty title="Non fai ancora parte di un'azienda">
-          Quando qualcuno ti invita, l'azienda compare qui.
-        </Empty>
-      ) : null}
-      {orgs.map((q, i) => {
-        const m = me.data?.memberships[i];
-        return (
-          <section key={m?.organizationId} className="mb-10">
-            <h1 className="text-xl font-semibold">{m?.name}</h1>
-            <p className="mb-4 text-sm text-ink-3">Sei {m?.role}</p>
-            {q.isPending ? (
-              <SkeletonRows rows={2} />
-            ) : q.data?.stations.length ? (
-              <div className="grid gap-3">
-                {q.data.stations.map((s) => (
-                  <Panel key={s.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                    <div>
-                      <p className="font-medium">{s.label ?? `Centralina ${s.id}`}</p>
-                      <p className="text-sm text-ink-3">
-                        {s.vineyard?.name ?? "Vigneto non indicato"} · aggiornata {ago(s.lastSeenAt)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-5 text-sm num">
-                      <span>{num(s.last?.tempC, 1, "°C")}</span>
-                      <span>{num(s.last?.humPct, 0, "%")}</span>
-                      <span title="minuti di foglia bagnata nell'ultimo intervallo">
-                        {s.last ? `${s.last.wetMin} min bagnati` : "—"}
-                      </span>
-                      <StatusLabel status={s.status} />
-                    </div>
-                  </Panel>
-                ))}
-              </div>
-            ) : (
-              <Empty title="Nessuna centralina installata">
-                Compariranno qui appena il tecnico le installa nei vostri vigneti.
-              </Empty>
-            )}
-          </section>
-        );
-      })}
+      <div className="mx-auto max-w-3xl px-4 py-7">
+        {me.data?.memberships.length === 0 ? (
+          <Empty title="Non fai ancora parte di un'azienda">
+            Quando qualcuno ti invita, l'azienda compare qui.
+          </Empty>
+        ) : null}
+        {orgs.map((q, i) => {
+          const m = me.data?.memberships[i];
+          return (
+            <section key={m?.organizationId} className="mb-10">
+              <h1 className="text-xl font-semibold">{m?.name}</h1>
+              <p className="mb-4 text-sm text-ink-3">Sei {m?.role}</p>
+              {q.isPending ? (
+                <SkeletonRows rows={2} />
+              ) : q.data?.stations.length ? (
+                <div className="grid gap-3">
+                  {q.data.stations.map((s) => (
+                    <Panel key={s.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                      <div>
+                        <p className="font-medium">{s.label ?? `Centralina ${s.id}`}</p>
+                        <p className="text-sm text-ink-3">
+                          {s.vineyard?.name ?? "Vigneto non indicato"} · aggiornata {ago(s.lastSeenAt)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-5 text-sm num">
+                        <span>{num(s.last?.tempC, 1, "°C")}</span>
+                        <span>{num(s.last?.humPct, 0, "%")}</span>
+                        <span title="minuti di foglia bagnata nell'ultimo intervallo">
+                          {s.last ? `${s.last.wetMin} min bagnati` : "—"}
+                        </span>
+                        <StatusLabel status={s.status} />
+                      </div>
+                    </Panel>
+                  ))}
+                </div>
+              ) : (
+                <Empty title="Nessuna centralina installata">
+                  Compariranno qui appena il tecnico le installa nei vostri vigneti.
+                </Empty>
+              )}
+            </section>
+          );
+        })}
+      </div>
     </div>
   );
 }

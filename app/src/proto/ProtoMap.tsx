@@ -39,6 +39,10 @@ export function ProtoMap({
       attributionControl: { compact: true },
     });
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    // l'attribuzione resta chiusa (la "i"): aperta copre il fondo della mappa
+    m.on("load", () =>
+      el.current?.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"),
+    );
     m.on("style.load", () => {
       for (const layer of m.getStyle().layers ?? []) {
         if (layer.type === "symbol" && m.getLayoutProperty(layer.id, "text-field") !== undefined)

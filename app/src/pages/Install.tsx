@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { Camera, CheckCircle2, LocateFixed } from "lucide-react";
 import { type FormEvent, useState } from "react";
-import { Brand } from "../components/Brand";
+import { CampoToggle } from "../components/CampoToggle";
 import { Button, ErrorBox, Field, Input, Select, Skeleton } from "../components/ui";
 import { api } from "../lib/api";
 import { ago, num } from "../lib/format";
@@ -235,8 +235,9 @@ export function Install() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto min-h-dvh max-w-md px-4 py-6">
-      <div className="mb-8">
-        <Brand />
+      <div className="-mx-4 -mt-6 mb-8 flex items-center justify-between bg-shell px-4 py-2.5 text-shell-ink">
+        <span className="text-[17px] font-bold tracking-tight">Vinai</span>
+        <CampoToggle />
       </div>
       {children}
     </main>

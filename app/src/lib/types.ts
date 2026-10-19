@@ -31,6 +31,7 @@ export interface FleetRow {
   battMv: number | null;
   rsrpDbm: number | null;
   last: { time: string; tempC: number | null; humPct: number | null; wetMin: number; flags: number } | null;
+  wet24: number[];
 }
 
 export interface StationConfig {

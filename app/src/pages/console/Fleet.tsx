@@ -1,12 +1,13 @@
+// Flotta nel mondo Verderame: il titolo dice quante centraline controllare, le righe sono ordinate
+// per urgenza e cambiano tinta con lo stato senza spostare le colonne; a destra la mappa.
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   cx,
   Empty,
   ErrorBox,
   Input,
-  PageHeader,
   Select,
   Skeleton,
   SkeletonRows,
@@ -30,6 +31,7 @@ const ORDER: FleetStatus[] = [
   "attiva",
   "dismessa",
 ];
+const PROBLEMS: FleetStatus[] = ["muta", "sensore_guasto", "batteria_bassa", "in_ritardo"];
 
 export function Fleet() {
   const navigate = useNavigate();
@@ -47,6 +49,7 @@ export function Fleet() {
   );
 
   const rows = fleet.data ?? [];
+  const active = rows.filter((r) => r.status !== "dismessa");
   const counts = useMemo(() => {
     const c = new Map<FleetStatus, number>();
     for (const r of rows) c.set(r.status, (c.get(r.status) ?? 0) + 1);
@@ -62,50 +65,48 @@ export function Fleet() {
   );
   const shown = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return (
-      rows
-        // le dismesse si vedono solo chiedendole
-        .filter((r) => (status === "tutte" ? r.status !== "dismessa" : r.status === status))
-        .filter((r) => org === "tutte" || (org === "nessuna" ? !r.organization : r.organization?.id === org))
-        .filter(
-          (r) =>
-            !needle ||
-            [r.label, r.imei, r.organization?.name, r.vineyard?.name].some((s) =>
-              s?.toLowerCase().includes(needle),
-            ),
-        )
-        .sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status))
-    );
+    return rows
+      .filter((r) => (status === "tutte" ? r.status !== "dismessa" : r.status === status))
+      .filter((r) => org === "tutte" || (org === "nessuna" ? !r.organization : r.organization?.id === org))
+      .filter(
+        (r) =>
+          !needle ||
+          [r.label, r.imei, r.organization?.name, r.vineyard?.name].some((s) =>
+            s?.toLowerCase().includes(needle),
+          ),
+      )
+      .sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status));
   }, [rows, status, org, q]);
-
-  const active = rows.filter((r) => r.status !== "dismessa").length;
-  const problems = rows.filter((r) =>
-    ["muta", "sensore_guasto", "batteria_bassa", "in_ritardo"].includes(r.status),
-  ).length;
+  const problems = active.filter((r) => PROBLEMS.includes(r.status)).length;
+  const changed = useChangedStatus(rows);
+  const tone = (r: FleetRow) =>
+    STATUS[r.status].tone === "neutral" || STATUS[r.status].tone === "ok" ? undefined : STATUS[r.status].tone;
 
   return (
     <>
-      <PageHeader
-        title="Flotta"
-        description={
-          fleet.data
-            ? problems
-              ? `${active} centraline in servizio, ${problems} da controllare.`
-              : `${active} centraline in servizio, nessun problema.`
-            : "Stato di tutte le centraline, aggiornato ogni 30 secondi."
-        }
-      />
+      <header className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+        <h1 className="text-[1.9rem] leading-tight font-bold tracking-tight">
+          {!fleet.data
+            ? "Flotta"
+            : problems
+              ? `${problems} ${problems === 1 ? "centralina" : "centraline"} da controllare`
+              : "Tutte le centraline stanno bene"}
+        </h1>
+        {fleet.data ? (
+          <span className="text-ink-3">{active.length} in servizio · aggiornato ogni 30 secondi</span>
+        ) : null}
+      </header>
       <ErrorBox error={fleet.error} />
       <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label="Filtra per stato">
-        <FilterChip active={status === "tutte"} onClick={() => setStatus("tutte")}>
-          In servizio <span className="text-ink-3 num">{active}</span>
-        </FilterChip>
+        <Chip active={status === "tutte"} onClick={() => setStatus("tutte")}>
+          In servizio <span className="num opacity-75">{active.length}</span>
+        </Chip>
         {ORDER.filter((s) => counts.get(s)).map((s) => (
-          <FilterChip key={s} active={status === s} onClick={() => setStatus(s)}>
-            <StatusLabel status={s} /> <span className="text-ink-3 num">{counts.get(s)}</span>
-          </FilterChip>
+          <Chip key={s} active={status === s} onClick={() => setStatus(s)}>
+            <StatusLabel status={s} /> <span className="num opacity-75">{counts.get(s)}</span>
+          </Chip>
         ))}
-        <div className="ml-auto flex w-full gap-2 sm:w-auto">
+        <div className="flex w-full gap-2 sm:ml-auto sm:w-auto">
           <Select
             value={org}
             onChange={(e) => setOrg(e.target.value)}
@@ -129,87 +130,131 @@ export function Fleet() {
           />
         </div>
       </div>
-      <Suspense fallback={<Skeleton className="h-[340px]" />}>
-        <FleetMap rows={shown} onOpen={open} />
-      </Suspense>
-      <div className="mt-6">
-        {fleet.isPending ? (
-          <SkeletonRows />
-        ) : shown.length === 0 ? (
-          <Empty
-            title={rows.length ? "Nessuna centralina con questi filtri" : "Nessuna centralina registrata"}
-          >
-            {rows.length
-              ? "Togli un filtro per vederne di più."
-              : "Le centraline nuove si registrano dal Laboratorio."}
-          </Empty>
-        ) : (
-          <Table>
-            <thead>
-              <tr>
-                <th>Centralina</th>
-                <th>Azienda e vigneto</th>
-                <th>Stato</th>
-                <th>Ultimo invio</th>
-                <th className="text-right!">Temp.</th>
-                <th className="text-right!">Umidità</th>
-                <th className="text-right!">Bagnatura</th>
-                <th className="text-right!">Batteria</th>
-                <th className="text-right!">Segnale</th>
-                <th>FW</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((r) => (
-                <tr
-                  key={r.id}
-                  onClick={() => open(r.id)}
-                  className="cursor-pointer transition-colors duration-100 hover:bg-panel-2"
-                >
-                  <td>
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
+        <div className="min-w-0">
+          {fleet.isPending ? (
+            <SkeletonRows />
+          ) : shown.length === 0 ? (
+            <Empty
+              title={rows.length ? "Nessuna centralina con questi filtri" : "Nessuna centralina registrata"}
+            >
+              {rows.length
+                ? "Togli un filtro per vederne di più."
+                : "Le centraline nuove si registrano dal Laboratorio."}
+            </Empty>
+          ) : (
+            <>
+              {/* sul telefono: un pannello per centralina, tre righe, niente scorrimento orizzontale */}
+              <ul className="grid gap-1.5 md:hidden">
+                {shown.map((r) => (
+                  <li key={r.id}>
                     <button
                       type="button"
                       onClick={() => open(r.id)}
-                      className="text-left font-medium hover:underline"
+                      data-tone={tone(r)}
+                      data-changed={changed.has(r.id) || undefined}
+                      className="grid w-full gap-1 rounded-lg bg-panel px-3 py-2.5 text-left text-sm transition-colors duration-200 data-[tone=bad]:bg-(--bad-row) data-[tone=warn]:bg-(--warn-row)"
                     >
-                      {r.label ?? "Senza nome"}
-                    </button>
-                    <span className="block font-mono text-xs text-ink-3">{r.imei}</span>
-                  </td>
-                  <td>
-                    {r.organization?.name ?? <span className="text-ink-3">Non assegnata</span>}
-                    {r.vineyard ? <span className="block text-xs text-ink-3">{r.vineyard.name}</span> : null}
-                  </td>
-                  <td>
-                    <StatusLabel status={r.status} />
-                    {r.issues.length > 1 ? (
-                      <span className="block text-xs text-ink-3">
-                        +{" "}
-                        {r.issues
-                          .slice(1)
-                          .map((i) => STATUS[i].label.toLowerCase())
-                          .join(", ")}
+                      <span className="flex items-center justify-between gap-3">
+                        <span className="font-semibold">{r.label ?? "Senza nome"}</span>
+                        <StatusLabel status={r.status} />
                       </span>
-                    ) : null}
-                  </td>
-                  <td className="whitespace-nowrap text-ink-2">{ago(r.lastSeenAt)}</td>
-                  <td className="text-right num">{num(r.last?.tempC, 1, "°C")}</td>
-                  <td className="text-right num">{num(r.last?.humPct, 0, "%")}</td>
-                  <td className="text-right num">{r.last ? `${r.last.wetMin} min` : "—"}</td>
-                  <td className="text-right num">{volts(r.battMv)}</td>
-                  <td className="text-right num">{r.rsrpDbm === null ? "—" : `${r.rsrpDbm} dBm`}</td>
-                  <td className="num text-ink-2">{fw(r.fwVer)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
+                      <span className="text-ink-2">
+                        {r.vineyard?.name ?? r.organization?.name ?? "Non assegnata"} · {ago(r.lastSeenAt)}
+                      </span>
+                      <span className="flex flex-wrap items-center gap-x-4 gap-y-1 text-ink-2 num">
+                        <Wet24 values={r.wet24} />
+                        <span>{num(r.last?.tempC, 1, "°C")}</span>
+                        <span>{volts(r.battMv)}</span>
+                        <span>{r.rsrpDbm === null ? "—" : `${r.rsrpDbm} dBm`}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden md:block">
+                <Table>
+                  <thead>
+                    <tr>
+                      <th>Stato</th>
+                      <th>Centralina</th>
+                      <th>Vigneto</th>
+                      <th>Ultimo invio</th>
+                      <th>Bagnatura 24 h</th>
+                      <th className="text-right!">Temp.</th>
+                      <th className="text-right!">UR</th>
+                      <th className="text-right!">Batteria</th>
+                      <th className="text-right!">Segnale</th>
+                      <th>FW</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shown.map((r) => (
+                      <tr
+                        key={r.id}
+                        onClick={() => open(r.id)}
+                        className="cursor-pointer"
+                        data-tone={tone(r)}
+                        data-changed={changed.has(r.id) || undefined}
+                      >
+                        <td>
+                          <StatusLabel status={r.status} />
+                          {r.issues.length > 1 ? (
+                            <span className="sr-only">
+                              , anche{" "}
+                              {r.issues
+                                .slice(1)
+                                .map((i) => STATUS[i].label.toLowerCase())
+                                .join(", ")}
+                            </span>
+                          ) : null}
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={() => open(r.id)}
+                            className="text-left font-semibold hover:underline"
+                          >
+                            {r.label ?? "Senza nome"}
+                          </button>{" "}
+                          <span className="font-mono text-xs text-ink-3">{r.imei.slice(-6)}</span>
+                        </td>
+                        <td title={r.organization?.name ?? undefined}>
+                          {r.vineyard?.name ?? (
+                            <span className="text-ink-3">{r.organization?.name ?? "Non assegnata"}</span>
+                          )}
+                        </td>
+                        <td className="text-ink-2 num">{ago(r.lastSeenAt)}</td>
+                        <td>
+                          <Wet24 values={r.wet24} />
+                        </td>
+                        <td className="text-right num">{num(r.last?.tempC, 1, "°C")}</td>
+                        <td className="text-right num">
+                          {r.last && r.last.humPct === null ? "guasto" : num(r.last?.humPct, 0, "%")}
+                        </td>
+                        <td className="text-right num">{volts(r.battMv)}</td>
+                        <td className="text-right num">{r.rsrpDbm === null ? "—" : `${r.rsrpDbm} dBm`}</td>
+                        <td className="text-ink-2 num">{fw(r.fwVer)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="xl:sticky xl:top-4">
+          <Suspense fallback={<Skeleton className="h-[460px]" />}>
+            <FleetMap rows={shown} onOpen={open} />
+          </Suspense>
+        </div>
       </div>
     </>
   );
 }
 
-function FilterChip({
+function Chip({
   active,
   onClick,
   children,
@@ -224,11 +269,56 @@ function FilterChip({
       aria-pressed={active}
       onClick={onClick}
       className={cx(
-        "inline-flex h-8 items-center gap-2 rounded-full border px-3 text-sm transition-colors duration-150",
-        active ? "border-ink-3 bg-panel-2 text-ink" : "border-line-soft text-ink-2 hover:border-line",
+        "inline-flex h-8 items-center gap-2 rounded-full px-3 text-sm transition-colors duration-150",
+        active
+          ? "bg-accent font-semibold text-accent-ink [&_svg]:text-current [&_span]:text-current"
+          : "bg-panel text-ink-2 hover:bg-panel-2",
       )}
     >
       {children}
     </button>
   );
+}
+
+/** Ultime 24 ore di foglia bagnata: una barra per ora, alta quanto i minuti bagnati. */
+function Wet24({ values }: { values: number[] }) {
+  if (!values.length) return <span className="text-ink-3">—</span>;
+  const w = 96;
+  const step = w / 24;
+  const wet = values.filter((v) => v >= 30).length;
+  return (
+    <svg width={w} height={18} role="img" aria-label={`${wet} ore bagnate nelle ultime 24`}>
+      <title>{`${wet} ore bagnate nelle ultime 24`}</title>
+      <line x1={0} x2={w} y1={17.5} y2={17.5} stroke="var(--line)" />
+      {values.slice(-24).map((v, i) => (
+        <rect
+          key={`${i}-${v}`}
+          x={i * step + 0.5}
+          y={17 - (v / 60) * 15}
+          width={Math.max(1, step - 1.5)}
+          height={(v / 60) * 15}
+          rx={1}
+          fill="var(--series)"
+        />
+      ))}
+    </svg>
+  );
+}
+
+/** Centraline il cui stato è cambiato all'ultimo aggiornamento: la riga si accende un istante. */
+function useChangedStatus(rows: FleetRow[]): Set<number> {
+  const prev = useRef<Map<number, FleetStatus> | null>(null);
+  const [changed, setChanged] = useState<Set<number>>(new Set());
+  useEffect(() => {
+    const before = prev.current;
+    const now = new Map(rows.map((r) => [r.id, r.status]));
+    prev.current = now;
+    if (!before) return;
+    const ids = rows.filter((r) => before.has(r.id) && before.get(r.id) !== r.status).map((r) => r.id);
+    if (!ids.length) return;
+    setChanged(new Set(ids));
+    const t = setTimeout(() => setChanged(new Set()), 1700);
+    return () => clearTimeout(t);
+  }, [rows]);
+  return changed;
 }

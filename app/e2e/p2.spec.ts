@@ -16,8 +16,8 @@ test("l'amministratore entra con il collegamento e vede la flotta", async ({ pag
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
   await loginWithLink(page, ADMIN);
   await expect(page).toHaveURL(/\/console$/);
-  await expect(page.getByRole("heading", { name: "Flotta" })).toBeVisible();
-  await expect(page.getByText(/centraline in servizio/)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /stanno bene|da controllare/ })).toBeVisible();
+  await expect(page.getByText(/in servizio · aggiornato ogni 30 secondi/)).toBeVisible();
   await expect(page.locator("tbody tr").first()).toBeVisible();
   await expect(page.locator(".maplibregl-canvas")).toBeVisible();
   await page.waitForTimeout(1500); // tile della mappa
@@ -109,7 +109,7 @@ test.describe("da amministratore", () => {
     });
     const page = await ctx.newPage();
     await page.goto("/console");
-    await expect(page.locator("tbody tr").first()).toBeVisible();
+    await expect(page.getByRole("listitem").first()).toBeVisible();
     await page.waitForTimeout(1200);
     await shot(page, "06-flotta-375");
     // nessuno scorrimento orizzontale della pagina (le tabelle scorrono dentro il loro riquadro)

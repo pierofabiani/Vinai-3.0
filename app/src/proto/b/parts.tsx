@@ -86,7 +86,9 @@ function useWidth(initial: number) {
 
 export function ProtectionLine({ v, now, full = false }: { v: Vineyard; now: number; full?: boolean }) {
   const { ref, w: W } = useWidth(640);
-  const H = full ? 132 : 40;
+  const H = full ? 150 : 40;
+  // sotto i 560 px un'etichetta ogni due giorni, perché non si sovrappongano
+  const labelEvery = W < 560 ? 2 : 1;
   const from = now - 7 * DAY;
   const to = now + 3 * DAY;
   const x = (t: number) => ((Math.min(Math.max(t, from), to) - from) / (to - from)) * W;
@@ -143,9 +145,17 @@ export function ProtectionLine({ v, now, full = false }: { v: Vineyard; now: num
         {ticks.map((d) => (
           <g key={d}>
             <line x1={x(d)} x2={x(d)} y1={barY - 8} y2={tickY + tickH} stroke="var(--rule)" />
-            <text x={x(d) + 3} y={H - 4} fontSize={11.5} fill="var(--ink-3)">
-              {fmtDayShort(new Date(d).toISOString())}
-            </text>
+            {Math.round((d - from) / DAY) % labelEvery === 0 && !(labelEvery > 1 && x(d) > W - 48) ? (
+              <text
+                x={x(d) > W - 48 ? W - 1 : x(d) + 3}
+                textAnchor={x(d) > W - 48 ? "end" : "start"}
+                y={H - 26}
+                fontSize={11.5}
+                fill="var(--ink-3)"
+              >
+                {fmtDayShort(new Date(d).toISOString())}
+              </text>
+            ) : null}
           </g>
         ))}
         <rect x={0} y={barY + barH / 2 - 1} width={W} height={2} fill="var(--rule)" />
@@ -193,14 +203,14 @@ export function ProtectionLine({ v, now, full = false }: { v: Vineyard; now: num
         ))}
         {firstUncovered && full ? (
           <text
-            x={x(firstUncovered) > W - 210 ? W - 2 : x(firstUncovered) + 4}
-            textAnchor={x(firstUncovered) > W - 210 ? "end" : "start"}
-            y={tickY + tickH + 14}
+            x={x(firstUncovered) > W - 290 ? W - 2 : x(firstUncovered) + 4}
+            textAnchor={x(firstUncovered) > W - 290 ? "end" : "start"}
+            y={H - 4}
             fontSize={12.5}
             fontWeight={650}
             fill="var(--vinaccia)"
           >
-            scoperto da {fmtWhen(new Date(firstUncovered).toISOString())}
+            rischio senza copertura da {fmtWhen(new Date(firstUncovered).toISOString())}
           </text>
         ) : null}
         {/* adesso */}

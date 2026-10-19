@@ -1,6 +1,7 @@
 // Direzione B · Verderame · Oggi: la sera si decide la mattina. Per ogni vigneto, quanta protezione resta
 // contro il rischio che arriva.
 import { useNavigate } from "@tanstack/react-router";
+import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   byWhen,
@@ -72,7 +73,8 @@ export function OggiB() {
             ))}
             {vs.length > 6 && s.ok.length ? (
               <details className="vrd-row" style={{ display: "block" }}>
-                <summary style={{ cursor: "pointer" }}>
+                <summary className="vrd-summary">
+                  <ChevronRight className="vrd-chevron" size={18} aria-hidden />
                   <VrdState a="ok">Coperti e senza rischio · {s.ok.length} vigneti</VrdState>
                 </summary>
                 <p style={{ marginTop: 8, color: "var(--ink-2)" }}>{s.ok.map((v) => v.name).join(", ")}.</p>

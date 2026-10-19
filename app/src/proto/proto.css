@@ -785,10 +785,10 @@
 }
 .vrd-table tr[data-s="muta"] td,
 .vrd-table tr[data-s="sensore_guasto"] td {
-  background: color-mix(in oklch, var(--panel) 72%, var(--vinaccia));
+  background: color-mix(in oklab, var(--panel) 80%, var(--vinaccia));
 }
 .vrd-table tr[data-s="batteria_bassa"] td {
-  background: color-mix(in oklch, var(--panel) 78%, var(--ruggine));
+  background: color-mix(in oklab, var(--panel) 86%, var(--ruggine));
 }
 .vrd-chip {
   display: inline-flex;
@@ -837,4 +837,23 @@
   .vrd-toggle-short {
     display: none;
   }
+}
+
+/* espansione dei vigneti senza rischio: freccia del mondo al posto del triangolo del browser */
+.vrd-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+.vrd-summary::-webkit-details-marker {
+  display: none;
+}
+.vrd-chevron {
+  color: var(--ink-3);
+  transition: transform 150ms ease-out;
+}
+details[open] > .vrd-summary .vrd-chevron {
+  transform: rotate(90deg);
 }

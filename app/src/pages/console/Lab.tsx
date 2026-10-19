@@ -216,7 +216,7 @@ export function ProvisioningReveal({ p, onClose }: { p: Provisioning; onClose: (
     setCopied(true);
   };
   return (
-    <Panel className="mb-6 border-warn/50 p-5">
+    <Panel className="mb-6 bg-[color-mix(in_oklch,var(--panel)_84%,var(--warn))] p-5">
       <div className="flex items-start gap-3">
         <ShieldAlert className="mt-0.5 size-5 shrink-0 text-warn" aria-hidden />
         <div className="min-w-0 flex-1">

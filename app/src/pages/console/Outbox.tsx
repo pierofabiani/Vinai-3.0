@@ -33,7 +33,7 @@ export function Outbox() {
       ) : mails.data?.length ? (
         <ul className="grid gap-3">
           {mails.data.map((m) => (
-            <li key={m.id} className="rounded-lg border border-line-soft bg-panel p-4">
+            <li key={m.id} className="rounded-xl bg-panel p-4">
               <p className="flex flex-wrap justify-between gap-2 text-sm">
                 <span className="font-medium">{m.subject}</span>
                 <span className="text-ink-3">

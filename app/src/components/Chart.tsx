@@ -49,6 +49,53 @@ function roundedBars(): uPlot.Series.PathBuilder {
   };
 }
 
+/** Mezzanotti di Roma tra min e max (secondi), al più `maxTicks` (saltando giorni se sono di più). */
+function midnights(min: number, max: number, maxTicks: number): number[] {
+  const hour = (t: number) =>
+    Number(
+      new Intl.DateTimeFormat("it", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Rome" }).format(
+        t * 1000,
+      ),
+    );
+  const out: number[] = [];
+  let t = Math.ceil(min / 3600) * 3600;
+  while (t <= max) {
+    if (hour(t) === 0) {
+      out.push(t);
+      t += 23 * 3600;
+    } else t += 3600;
+  }
+  const step = Math.ceil(out.length / maxTicks);
+  return out.filter((_, i) => i % step === 0);
+}
+
+/** Meno di due mezzanotti nell'intervallo: tacche orarie ogni 3 o 6 ore. */
+function hours(min: number, max: number): number[] {
+  const every = (max - min) / 3600 > 12 ? 6 : 3;
+  const out: number[] = [];
+  for (let t = Math.ceil(min / (every * 3600)) * every * 3600; t <= max; t += every * 3600) out.push(t);
+  if (out.length >= 2) return out;
+  // intervallo di poche ore o minuti (per esempio i dati di un simulatore accelerato): 4 tacche uguali
+  // centrate nei quattro quarti: nessuna tacca sull'origine, dove c'è l'etichetta dell'asse y
+  return Array.from({ length: 4 }, (_, i) => min + ((max - min) * (i + 0.5)) / 4);
+}
+
+const fmtDayTick = (t: number) =>
+  new Intl.DateTimeFormat("it", { weekday: "short", day: "numeric", timeZone: "Europe/Rome" }).format(
+    t * 1000,
+  );
+const fmtSecondTick = (t: number) =>
+  new Intl.DateTimeFormat("it", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "Europe/Rome",
+  }).format(t * 1000);
+const fmtHourTick = (t: number) =>
+  new Intl.DateTimeFormat("it", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Rome" }).format(
+    t * 1000,
+  );
+
 export function Chart({
   title,
   unit,
@@ -77,7 +124,7 @@ export function Chart({
       stroke: ink3,
       grid: { stroke: grid, width: 1 },
       ticks: { show: false },
-      font: "12px IBM Plex Sans",
+      font: "12px Hanken Grotesk Variable, sans-serif",
     };
     const opts: Options = {
       width: el.clientWidth,
@@ -100,10 +147,18 @@ export function Chart({
       axes: [
         {
           ...axis,
-          values: (_u, ticks) =>
-            ticks.map((t) =>
-              new Intl.DateTimeFormat("it", { day: "numeric", month: "short" }).format(t * 1000),
-            ),
+          // tacche a mezzanotte (ora italiana) per più giorni, orarie per un giorno solo: mai etichette ripetute
+          splits: (_u, _i, min, max) => {
+            const days = midnights(min, max, 7);
+            return days.length >= 2 ? days : hours(min, max);
+          },
+          values: (u, ticks) => {
+            const s = u.scales.x;
+            const days = midnights(s?.min ?? 0, s?.max ?? 0, 7);
+            if (days.length >= 2) return ticks.map(fmtDayTick);
+            // sotto l'ora servono i secondi, altrimenti le etichette si ripetono
+            return ticks.map((s?.max ?? 0) - (s?.min ?? 0) < 3600 ? fmtSecondTick : fmtHourTick);
+          },
         },
         { ...axis, size: 48, values: (_u, ticks) => ticks.map((t) => format(t).replace(` ${unit}`, "")) },
       ],

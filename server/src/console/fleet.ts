@@ -52,6 +52,8 @@ export interface FleetRow {
   battMv: number | null;
   rsrpDbm: number | null;
   last: { time: string; tempC: number | null; humPct: number | null; wetMin: number; flags: number } | null;
+  /** minuti bagnati per ora nelle ultime 24 ore (dagli aggregati orari), dal più vecchio */
+  wet24: number[];
 }
 
 export async function listFleet(
@@ -82,6 +84,7 @@ export async function listFleet(
       hum_pct: number | null;
       wet_min: number | null;
       flags: number | null;
+      wet24: number[] | null;
     }[]
   >`
     SELECT s.id, s.imei::text, s.label, s.status,
@@ -89,7 +92,9 @@ export async function listFleet(
            ST_Y(s.location::geometry) AS lat, ST_X(s.location::geometry) AS lon,
            s.last_seen_at, s.fw_ver, s.cfg_ver,
            coalesce(cv.params, s.factory_config) AS config,
-           h.batt_mv, h.rsrp_dbm, m.time AS m_time, m.temp_c, m.hum_pct, m.wet_min, m.flags
+           h.batt_mv, h.rsrp_dbm, m.time AS m_time, m.temp_c, m.hum_pct, m.wet_min, m.flags,
+           (SELECT json_agg(round(w.wet_min)::int ORDER BY w.bucket) FROM measurement_1h w
+             WHERE w.station_id = s.id AND w.bucket >= ${new Date(now.getTime() - 24 * 3_600_000)}) AS wet24
     FROM station s
     LEFT JOIN organization o ON o.id = s.organization_id
     LEFT JOIN vineyard v ON v.id = s.vineyard_id
@@ -128,6 +133,7 @@ export async function listFleet(
             flags: r.flags ?? 0,
           }
         : null,
+      wet24: r.wet24 ?? [],
     };
   });
 }

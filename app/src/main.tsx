@@ -3,8 +3,11 @@ import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ApiError } from "./lib/api";
+import { initCampo } from "./lib/campo";
 import { router } from "./router";
 import "./index.css";
+
+initCampo();
 
 const queryClient = new QueryClient({
   defaultOptions: {
