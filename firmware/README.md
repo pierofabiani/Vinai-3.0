@@ -96,6 +96,10 @@ Protezione: una configurazione di rete diventa "collaudata" solo dopo un invio r
 
 ## Compilazione per il PIC (MPLAB X + XC16)
 
+Scorciatoia da terminale, dopo aver installato XC16: `cd firmware && make pic`. Usa il compilatore a riga di comando e non ha ancora un file `.hex` finale: gli errori del primo tentativo vanno completati nel driver (TODO(fase 1)).
+
+La procedura con MPLAB X qui sotto resta quella consigliata per programmare la scheda.
+
 1. Nuovo progetto "Standalone", dispositivo **PIC24FJ256GA704**, compilatore XC16.
 2. Aggiungere tutti i `.c` di `src/` (non quelli di `tests/`).
 3. Generare i bit di configurazione come indicato in testa a `hal_pic24.c`.
