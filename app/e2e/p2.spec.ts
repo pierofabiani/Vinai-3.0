@@ -32,7 +32,8 @@ test.describe("da amministratore", () => {
 
   test("scheda della centralina con grafici e configurazione", async ({ page }) => {
     await page.goto("/console");
-    await page.locator("tbody tr", { hasText: "Attiva" }).first().click();
+    // la prima riga non dismessa: lo stato dipende dall'ora, il test no
+    await page.locator("tbody tr").first().click();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByText("Temperatura, media oraria con minimo e massimo")).toBeVisible();
     await expect(page.locator(".uplot")).toHaveCount(5);
