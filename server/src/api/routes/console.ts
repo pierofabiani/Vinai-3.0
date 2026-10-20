@@ -76,8 +76,9 @@ export function consoleRoutes(d: ApiDeps) {
     }).catch((e: Error) => {
       throw new HTTPException(400, { message: e.message });
     });
-    await sql`INSERT INTO lab_event (station_id, kind, user_id) VALUES (${p.id}, 'creata', ${user.id}),
-                                                                        (${p.id}, 'chiave_scaricata', ${user.id})`;
+    // due istruzioni: nella stessa istruzione i due eventi avrebbero lo stesso orario e un ordine incerto
+    await sql`INSERT INTO lab_event (station_id, kind, user_id) VALUES (${p.id}, 'creata', ${user.id})`;
+    await sql`INSERT INTO lab_event (station_id, kind, user_id) VALUES (${p.id}, 'chiave_scaricata', ${user.id})`;
     await audit(sql, c, "centralina.creata", `station:${p.id}`, { imei: b.imei });
     // la chiave in chiaro esce solo qui: non si potrà più rileggere, solo rigenerare
     return c.json({ id: p.id, provisioning: provisioningFile(b.imei, p.key, serverIp) }, 201);
