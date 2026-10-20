@@ -1,0 +1,43 @@
+name: piattaforma
+
+on:
+  push:
+    paths: ["server/**", "app/**", "packages/**", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "turbo.json", "biome.json", "tsconfig.base.json", ".github/workflows/platform.yml"]
+  pull_request:
+    paths: ["server/**", "app/**", "packages/**", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "turbo.json", "biome.json", "tsconfig.base.json", ".github/workflows/platform.yml"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      # stesso database dello sviluppo: i test di ingest e del simulatore lo usano davvero
+      db:
+        image: timescale/timescaledb-ha:pg17
+        env:
+          POSTGRES_USER: vinai
+          POSTGRES_PASSWORD: vinai
+          POSTGRES_DB: vinai
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U vinai -d vinai"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgres://vinai:vinai@127.0.0.1:5432/vinai
+      # solo per i test: non è la chiave di nessun ambiente vero
+      STATION_KEY_SECRET: "0707070707070707070707070707070707070707070707070707070707070707"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint e formattazione
+        run: pnpm lint
+      - name: Controllo dei tipi
+        run: pnpm typecheck
+      - name: Test (codec sui vettori del firmware, ingest, simulatore di flotta)
+        run: pnpm test
+      - name: Build
+        run: pnpm build

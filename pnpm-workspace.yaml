@@ -1,0 +1,8 @@
+packages:
+  - server
+  - app
+  - packages/*
+
+# Script di installazione permessi solo a pacchetti noti
+allowBuilds:
+  esbuild: true

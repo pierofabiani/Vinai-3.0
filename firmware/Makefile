@@ -16,7 +16,20 @@ build/tests: $(SRC_CORE) $(SRC_DRV) $(SRC_APP) $(SRC_TEST)
 	@mkdir -p build
 	$(CC) $(CFLAGS) -o $@ $^
 
+# Vettori d'oro del protocollo per il server (packages/protocol). Rigenerare
+# a ogni modifica di packet.h, record.h, coap.h o config.h e fare il commit del JSON.
+VECTORS = ../packages/protocol/vectors/firmware.json
+SRC_VEC = tools/gen_vectors.c src/core/packet.c src/core/record.c src/core/sha256.c src/core/crc.c src/core/coap.c src/core/config.c
+
+vectors: build/gen_vectors
+	@mkdir -p $(dir $(VECTORS))
+	./build/gen_vectors | python3 -m json.tool --indent 1 > $(VECTORS)
+
+build/gen_vectors: $(SRC_VEC)
+	@mkdir -p build
+	$(CC) $(CFLAGS) -o $@ $^
+
 clean:
 	rm -rf build
 
-.PHONY: test clean
+.PHONY: test vectors clean

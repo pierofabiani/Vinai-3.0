@@ -1,0 +1,22 @@
+# Database per lo sviluppo locale e l'ambiente di prova.
+# Porta 5442 solo su localhost: sulla 5432 del server gira già un altro PostgreSQL.
+name: vinai-dev
+services:
+  db:
+    image: timescale/timescaledb-ha:pg17
+    environment:
+      POSTGRES_USER: vinai
+      POSTGRES_PASSWORD: vinai
+      POSTGRES_DB: vinai
+    ports:
+      - "127.0.0.1:5442:5432"
+    volumes:
+      - vinai-db:/home/postgres/pgdata
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinai -d vinai"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  vinai-db:

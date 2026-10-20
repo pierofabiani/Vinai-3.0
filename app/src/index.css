@@ -1,0 +1,185 @@
+@import "tailwindcss";
+@import "@fontsource-variable/hanken-grotesk";
+@import "maplibre-gl/dist/maplibre-gl.css";
+@import "uplot/dist/uPlot.min.css";
+
+/*
+ * Mondo Verderame (direzione scelta in P3: docs/design/p3-direzioni.md, contratto in
+ * app/.impeccable/surfaces/, sistema in DESIGN.md).
+ *   Blu notte come fondo: la sera si decide il trattamento di domani.
+ *   Azzurro solfato di rame = protezione e azione principale.
+ *   Vinaccia = rischio e guasto · ruggine = attenzione · verde foglia = tutto bene · grigio-azzurro = acqua.
+ *   Modalità campo (html[data-campo="true"]): calce bianca ad alto contrasto, per il sole. Stessi ruoli.
+ * I componenti usano solo questi nomi.
+ */
+:root {
+  color-scheme: dark;
+  --bg: oklch(0.19 0.03 240);
+  --panel: oklch(0.235 0.032 238);
+  --panel-2: oklch(0.27 0.034 236);
+  --shell: oklch(0.3 0.06 205);
+  --shell-ink: oklch(0.96 0.02 200);
+  --line: oklch(0.36 0.03 238);
+  --line-soft: oklch(0.3 0.03 238);
+  --ink: oklch(0.95 0.01 220);
+  --ink-2: oklch(0.8 0.02 220);
+  --ink-3: oklch(0.68 0.025 220);
+  /* verderame: protezione e azione principale */
+  --accent: oklch(0.76 0.12 200);
+  --accent-ink: oklch(0.2 0.03 240);
+  --ok: oklch(0.78 0.15 140);
+  --warn: oklch(0.74 0.14 52);
+  --bad: oklch(0.66 0.2 352);
+  --neutral: oklch(0.7 0.03 230);
+  --water: oklch(0.84 0.03 240);
+  --focus: oklch(0.82 0.1 200);
+  /* righe con un problema: vinaccia (guasto) e ruggine (attenzione), mescolate in oklab per non
+     passare dal viola; mai scambiabili con una selezione */
+  --bad-row: color-mix(in oklab, var(--panel) 80%, var(--bad));
+  --warn-row: color-mix(in oklab, var(--panel) 86%, var(--warn));
+  /* serie dei grafici: acqua, non verderame (che vuol dire protezione); validata sulla superficie */
+  --series: #5b97d3;
+  --series-wash: color-mix(in oklch, #5b97d3 16%, transparent);
+  --grid: oklch(0.3 0.03 238);
+  --shadow: 0 10px 28px -14px oklch(0 0 0 / 0.6);
+}
+
+:root[data-campo="true"] {
+  color-scheme: light;
+  --bg: oklch(0.975 0.006 210);
+  --panel: oklch(1 0 0);
+  --panel-2: oklch(0.955 0.01 215);
+  --shell: oklch(0.42 0.09 205);
+  --shell-ink: oklch(0.98 0.01 200);
+  --line: oklch(0.82 0.02 220);
+  --line-soft: oklch(0.89 0.015 220);
+  --ink: oklch(0.2 0.03 240);
+  --ink-2: oklch(0.36 0.03 240);
+  --ink-3: oklch(0.46 0.03 240);
+  --accent: oklch(0.48 0.11 210);
+  --accent-ink: oklch(0.99 0.005 200);
+  --ok: oklch(0.52 0.15 145);
+  --warn: oklch(0.58 0.15 50);
+  --bad: oklch(0.5 0.2 352);
+  --neutral: oklch(0.5 0.03 240);
+  --water: oklch(0.55 0.05 245);
+  --focus: oklch(0.48 0.12 210);
+  --bad-row: color-mix(in oklab, var(--panel) 90%, var(--bad));
+  --warn-row: color-mix(in oklab, var(--panel) 88%, var(--warn));
+  --series: #1f6cb0;
+  --series-wash: color-mix(in oklch, #1f6cb0 12%, transparent);
+  --grid: oklch(0.9 0.012 220);
+  --shadow: 0 10px 28px -16px oklch(0.3 0.03 240 / 0.35);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-shell: var(--shell);
+  --color-shell-ink: var(--shell-ink);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-neutral: var(--neutral);
+  --color-water: var(--water);
+  --font-sans: "Hanken Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  /* solo per codici e chiavi (IMEI, chiave HMAC): sono dati da copiare, non decorazione */
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15.5px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--accent) 35%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+* {
+  scrollbar-color: var(--line) transparent;
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+input,
+select {
+  accent-color: var(--accent);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+.uplot,
+.u-legend {
+  font-family: var(--font-sans);
+}
+
+.maplibregl-ctrl-attrib {
+  font-family: var(--font-sans);
+}
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: color-mix(in oklab, var(--panel) 88%, transparent) !important;
+  color: var(--ink-2);
+}
+.maplibregl-ctrl-attrib.maplibregl-compact a {
+  color: var(--ink-2) !important;
+}
+.maplibregl-ctrl-attrib-button {
+  background-color: var(--ink-2) !important;
+  border-radius: 999px;
+}
+
+/* un cambio di stato nella flotta: la riga si accende un istante, poi torna al suo colore */
+@keyframes stato-cambiato {
+  from {
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
+  to {
+    box-shadow: inset 0 0 0 2px transparent;
+  }
+}
+[data-changed="true"] > td,
+[data-changed="true"] {
+  animation: stato-cambiato 1.6s ease-out;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: white;
+    color: black;
+  }
+}

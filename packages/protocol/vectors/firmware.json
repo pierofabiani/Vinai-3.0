@@ -1,0 +1,705 @@
+{
+ "generator": "firmware/tools/gen_vectors.c",
+ "pkt_proto_ver": 1,
+ "config_defaults": {
+  "version": 0,
+  "interval_min": 10,
+  "send_every": 6,
+  "wet_sample_s": 60,
+  "wet_threshold": 1500,
+  "wet_hyst": 40,
+  "wet_polarity": 0,
+  "server_ip": "10.0.0.1",
+  "server_port": 5683,
+  "quiet_start_h": 255,
+  "quiet_end_h": 255,
+  "alert_frost_dC": 10,
+  "low_batt_mv": 3300,
+  "apn": "iot.1nce.net",
+  "bands": [
+   8,
+   20
+  ],
+  "plmn": 0
+ },
+ "uplinks": [
+  {
+   "name": "sei record, primo invio",
+   "key": "112233445566778899aabbccddeeff10",
+   "imei": "869951031234567",
+   "fw_ver": 768,
+   "cfg_ver": 0,
+   "health": {
+    "batt_mv": 4410,
+    "rsrp_dbm": -97,
+    "snr_db": 6,
+    "csq": 18,
+    "last_reset": 1,
+    "reset_count": 3,
+    "modem_fails": 0,
+    "lost_records": 0,
+    "cfg_rejected": 0
+   },
+   "first_seq": 1,
+   "records": [
+    {
+     "seq": 1,
+     "time": 216000000,
+     "temp_dC": 85,
+     "hum_dPct": 920,
+     "press_dhPa": 10132,
+     "wet_raw": 1300,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 2,
+     "time": 216000600,
+     "temp_dC": 92,
+     "hum_dPct": 909,
+     "press_dhPa": 10131,
+     "wet_raw": 1323,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 3,
+     "time": 216001200,
+     "temp_dC": 98,
+     "hum_dPct": 898,
+     "press_dhPa": 10130,
+     "wet_raw": 1346,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 4,
+     "time": 216001800,
+     "temp_dC": 103,
+     "hum_dPct": 887,
+     "press_dhPa": 10129,
+     "wet_raw": 1369,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 5,
+     "time": 216002400,
+     "temp_dC": 108,
+     "hum_dPct": 876,
+     "press_dhPa": 10128,
+     "wet_raw": 1392,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 6,
+     "time": 216003000,
+     "temp_dC": 112,
+     "hum_dPct": 865,
+     "press_dhPa": 10127,
+     "wet_raw": 1415,
+     "wet_min": 4,
+     "flags": 0
+    }
+   ],
+   "payload": "01010750304237170300000300003a119f06120103000000000000010000000600e6df0c55009803942714050a0058e8df0c5c008d0393272b050a00b0eadf0c62008203922742050a0008eddf0c67007703912759050a0060efdf0c6c006c03902770050a00b8f1df0c700061038f27870504008ffc15375630e15a",
+   "tag": "8ffc1537",
+   "coap": {
+    "msg_id": 257,
+    "token": "a1b20101",
+    "datagram": "44020101a1b20101b16d112aff01010750304237170300000300003a119f06120103000000000000010000000600e6df0c55009803942714050a0058e8df0c5c008d0393272b050a00b0eadf0c62008203922742050a0008eddf0c67007703912759050a0060efdf0c6c006c03902770050a00b8f1df0c700061038f27870504008ffc15375630e15a"
+   }
+  },
+  {
+   "name": "trenta record, arretrato, configurazione 7 rifiutata",
+   "key": "112233445566778899aabbccddeeff10",
+   "imei": "869951031234567",
+   "fw_ver": 768,
+   "cfg_ver": 6,
+   "health": {
+    "batt_mv": 3980,
+    "rsrp_dbm": -113,
+    "snr_db": -3,
+    "csq": 7,
+    "last_reset": 4,
+    "reset_count": 12,
+    "modem_fails": 2,
+    "lost_records": 5,
+    "cfg_rejected": 7
+   },
+   "first_seq": 4242,
+   "records": [
+    {
+     "seq": 4242,
+     "time": 216100000,
+     "temp_dC": 85,
+     "hum_dPct": 920,
+     "press_dhPa": 10132,
+     "wet_raw": 1300,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 4243,
+     "time": 216100600,
+     "temp_dC": 92,
+     "hum_dPct": 909,
+     "press_dhPa": 10131,
+     "wet_raw": 1323,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 4244,
+     "time": 216101200,
+     "temp_dC": 98,
+     "hum_dPct": 898,
+     "press_dhPa": 10130,
+     "wet_raw": 1346,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 4245,
+     "time": 216101800,
+     "temp_dC": 103,
+     "hum_dPct": 887,
+     "press_dhPa": 10129,
+     "wet_raw": 1369,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 4246,
+     "time": 216102400,
+     "temp_dC": 108,
+     "hum_dPct": 876,
+     "press_dhPa": 10128,
+     "wet_raw": 1392,
+     "wet_min": 10,
+     "flags": 0
+    },
+    {
+     "seq": 4247,
+     "time": 216103000,
+     "temp_dC": 112,
+     "hum_dPct": 865,
+     "press_dhPa": 10127,
+     "wet_raw": 1415,
+     "wet_min": 4,
+     "flags": 0
+    },
+    {
+     "seq": 4248,
+     "time": 216103600,
+     "temp_dC": 115,
+     "hum_dPct": 854,
+     "press_dhPa": 10126,
+     "wet_raw": 1438,
+     "wet_min": 4,
+     "flags": 0
+    },
+    {
+     "seq": 4249,
+     "time": 216104200,
+     "temp_dC": 118,
+     "hum_dPct": 843,
+     "press_dhPa": 10125,
+     "wet_raw": 1461,
+     "wet_min": 4,
+     "flags": 0
+    },
+    {
+     "seq": 4250,
+     "time": 216104800,
+     "temp_dC": 120,
+     "hum_dPct": 832,
+     "press_dhPa": 10124,
+     "wet_raw": 1484,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4251,
+     "time": 216105400,
+     "temp_dC": 121,
+     "hum_dPct": 821,
+     "press_dhPa": 10123,
+     "wet_raw": 1507,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4252,
+     "time": 216106000,
+     "temp_dC": 122,
+     "hum_dPct": 810,
+     "press_dhPa": 10122,
+     "wet_raw": 1530,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4253,
+     "time": 216106600,
+     "temp_dC": 122,
+     "hum_dPct": 799,
+     "press_dhPa": 10121,
+     "wet_raw": 1553,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4254,
+     "time": 216107200,
+     "temp_dC": 121,
+     "hum_dPct": 788,
+     "press_dhPa": 10120,
+     "wet_raw": 1576,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4255,
+     "time": 216107800,
+     "temp_dC": 120,
+     "hum_dPct": 777,
+     "press_dhPa": 10119,
+     "wet_raw": 1599,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4256,
+     "time": 216108400,
+     "temp_dC": 118,
+     "hum_dPct": 766,
+     "press_dhPa": 10118,
+     "wet_raw": 1622,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4257,
+     "time": 216109000,
+     "temp_dC": 115,
+     "hum_dPct": 755,
+     "press_dhPa": 10117,
+     "wet_raw": 1645,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4258,
+     "time": 216109600,
+     "temp_dC": 112,
+     "hum_dPct": 744,
+     "press_dhPa": 10116,
+     "wet_raw": 1668,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4259,
+     "time": 216110200,
+     "temp_dC": 108,
+     "hum_dPct": 733,
+     "press_dhPa": 10115,
+     "wet_raw": 1691,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4260,
+     "time": 216110800,
+     "temp_dC": 103,
+     "hum_dPct": 722,
+     "press_dhPa": 10114,
+     "wet_raw": 1714,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4261,
+     "time": 216111400,
+     "temp_dC": 98,
+     "hum_dPct": 711,
+     "press_dhPa": 10113,
+     "wet_raw": 1737,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4262,
+     "time": 216112000,
+     "temp_dC": 92,
+     "hum_dPct": 700,
+     "press_dhPa": 10112,
+     "wet_raw": 1760,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4263,
+     "time": 216112600,
+     "temp_dC": 85,
+     "hum_dPct": 689,
+     "press_dhPa": 10111,
+     "wet_raw": 1783,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4264,
+     "time": 216113200,
+     "temp_dC": 78,
+     "hum_dPct": 678,
+     "press_dhPa": 10110,
+     "wet_raw": 1806,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4265,
+     "time": 216113800,
+     "temp_dC": 70,
+     "hum_dPct": 667,
+     "press_dhPa": 10109,
+     "wet_raw": 1829,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4266,
+     "time": 216114400,
+     "temp_dC": 61,
+     "hum_dPct": 656,
+     "press_dhPa": 10108,
+     "wet_raw": 1852,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4267,
+     "time": 216115000,
+     "temp_dC": 52,
+     "hum_dPct": 645,
+     "press_dhPa": 10107,
+     "wet_raw": 1875,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4268,
+     "time": 216115600,
+     "temp_dC": 42,
+     "hum_dPct": 634,
+     "press_dhPa": 10106,
+     "wet_raw": 1898,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4269,
+     "time": 216116200,
+     "temp_dC": 31,
+     "hum_dPct": 623,
+     "press_dhPa": 10105,
+     "wet_raw": 1921,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4270,
+     "time": 216116800,
+     "temp_dC": 20,
+     "hum_dPct": 612,
+     "press_dhPa": 10104,
+     "wet_raw": 1944,
+     "wet_min": 0,
+     "flags": 0
+    },
+    {
+     "seq": 4271,
+     "time": 216117400,
+     "temp_dC": 8,
+     "hum_dPct": 601,
+     "press_dhPa": 10103,
+     "wet_raw": 1967,
+     "wet_min": 0,
+     "flags": 0
+    }
+   ],
+   "payload": "01010750304237170300000306008c0f8ffd07040c000205000700921000001ea06ce10c55009803942714050a00f86ee10c5c008d0393272b050a005071e10c62008203922742050a00a873e10c67007703912759050a000076e10c6c006c03902770050a005878e10c700061038f2787050400b07ae10c730056038e279e050400087de10c76004b038d27b5050400607fe10c780040038c27cc050000b881e10c790035038b27e30500001084e10c7a002a038a27fa0500006886e10c7a001f03892711060000c088e10c79001403882728060000188be10c7800090387273f060000708de10c7600fe02862756060000c88fe10c7300f30285276d0600002092e10c7000e8028427840600007894e10c6c00dd0283279b060000d096e10c6700d2028227b20600002899e10c6200c7028127c9060000809be10c5c00bc028027e0060000d89de10c5500b1027f27f706000030a0e10c4e00a6027e270e07000088a2e10c46009b027d2725070000e0a4e10c3d0090027c273c07000038a7e10c340085027b275307000090a9e10c2a007a027a276a070000e8abe10c1f006f0279278107000040aee10c1400640278279807000098b0e10c080059027727af0700003b40f629a038076c",
+   "tag": "3b40f629",
+   "coap": {
+    "msg_id": 258,
+    "token": "a1b20102",
+    "datagram": "44020102a1b20102b16d112aff01010750304237170300000306008c0f8ffd07040c000205000700921000001ea06ce10c55009803942714050a00f86ee10c5c008d0393272b050a005071e10c62008203922742050a00a873e10c67007703912759050a000076e10c6c006c03902770050a005878e10c700061038f2787050400b07ae10c730056038e279e050400087de10c76004b038d27b5050400607fe10c780040038c27cc050000b881e10c790035038b27e30500001084e10c7a002a038a27fa0500006886e10c7a001f03892711060000c088e10c79001403882728060000188be10c7800090387273f060000708de10c7600fe02862756060000c88fe10c7300f30285276d0600002092e10c7000e8028427840600007894e10c6c00dd0283279b060000d096e10c6700d2028227b20600002899e10c6200c7028127c9060000809be10c5c00bc028027e0060000d89de10c5500b1027f27f706000030a0e10c4e00a6027e270e07000088a2e10c46009b027d2725070000e0a4e10c3d0090027c273c07000038a7e10c340085027b275307000090a9e10c2a007a027a276a070000e8abe10c1f006f0279278107000040aee10c1400640278279807000098b0e10c080059027727af0700003b40f629a038076c"
+   }
+  },
+  {
+   "name": "solo salute, valori estremi",
+   "key": "2233445566778899aabbccddeeff1021",
+   "imei": "869951031234567",
+   "fw_ver": 768,
+   "cfg_ver": 6,
+   "health": {
+    "batt_mv": 3150,
+    "rsrp_dbm": -125,
+    "snr_db": -10,
+    "csq": 99,
+    "last_reset": 2,
+    "reset_count": 65535,
+    "modem_fails": 255,
+    "lost_records": 65535,
+    "cfg_rejected": 0
+   },
+   "first_seq": 77,
+   "records": [],
+   "payload": "01010750304237170300000306004e0c83f66302ffffffffff00004d0000000075dd6bf829a5cb16",
+   "tag": "75dd6bf8",
+   "coap": {
+    "msg_id": 65534,
+    "token": "a1b2fffe",
+    "datagram": "4402fffea1b2fffeb16d112aff01010750304237170300000306004e0c83f66302ffffffffff00004d0000000075dd6bf829a5cb16"
+   }
+  },
+  {
+   "name": "sensori guasti, gelo, sequenza alta",
+   "key": "33445566778899aabbccddeeff102132",
+   "imei": "351234567890123",
+   "fw_ver": 769,
+   "cfg_ver": 3,
+   "health": {
+    "batt_mv": 4500,
+    "rsrp_dbm": -80,
+    "snr_db": 12,
+    "csq": 25,
+    "last_reset": 0,
+    "reset_count": 0,
+    "modem_fails": 0,
+    "lost_records": 0,
+    "cfg_rejected": 0
+   },
+   "first_seq": 4294967280,
+   "records": [
+    {
+     "seq": 4294967280,
+     "time": 300000000,
+     "temp_dC": -32768,
+     "hum_dPct": 920,
+     "press_dhPa": 10132,
+     "wet_raw": 1300,
+     "wet_min": 10,
+     "flags": 1
+    },
+    {
+     "seq": 4294967281,
+     "time": 300000600,
+     "temp_dC": -153,
+     "hum_dPct": 65535,
+     "press_dhPa": 65535,
+     "wet_raw": 1323,
+     "wet_min": 10,
+     "flags": 54
+    }
+   ],
+   "payload": "0101cbe4a62b723f0100010303009411b00c190000000000000000f0ffffff0200a3e11100809803942714050a0158a5e11167ffffffffff2b050a36f07efe133dfbdf7e",
+   "tag": "f07efe13",
+   "coap": {
+    "msg_id": 0,
+    "token": "a1b20000",
+    "datagram": "44020000a1b20000b16d112aff0101cbe4a62b723f0100010303009411b00c190000000000000000f0ffffff0200a3e11100809803942714050a0158a5e11167ffffffffff2b050a36f07efe133dfbdf7e"
+   }
+  }
+ ],
+ "downlinks": [
+  {
+   "name": "conferma senza configurazione",
+   "key": "112233445566778899aabbccddeeff10",
+   "req_tag": "deadbeef",
+   "acked_seq": 6,
+   "server_time": 216003700,
+   "flags": 0,
+   "cfg_ver": 0,
+   "cfg": "",
+   "payload": "0181deadbeef0600000074f4df0c0000000054ac44192e4b1298"
+  },
+  {
+   "name": "conferma con configurazione e firmware disponibile",
+   "key": "112233445566778899aabbccddeeff10",
+   "req_tag": "deadbeef",
+   "acked_seq": 4271,
+   "server_time": 216200000,
+   "flags": 1,
+   "cfg_ver": 8,
+   "cfg": "01010f0201040402dc050902f6ff0b09696f742e74657374310c0214080d0452560000",
+   "payload": "0181deadbeefaf10000040f3e20c0108002301010f0201040402dc050902f6ff0b09696f742e74657374310c0214080d04525600004aeff217d9efb88f"
+  },
+  {
+   "name": "valori massimi",
+   "key": "33445566778899aabbccddeeff102132",
+   "req_tag": "deadbeef",
+   "acked_seq": 4294967281,
+   "server_time": 4294967295,
+   "flags": 0,
+   "cfg_ver": 65535,
+   "cfg": "",
+   "payload": "0181deadbeeff1ffffffffffffff00ffff00ed495b70cb82294f"
+  }
+ ],
+ "configs": [
+  {
+   "name": "modifica tutti i parametri",
+   "tlv": "01010f0201040402dc050902f6ff0b09696f742e74657374310c0214080d0452560000",
+   "version": 8,
+   "result": "ok",
+   "config": {
+    "version": 8,
+    "interval_min": 15,
+    "send_every": 4,
+    "wet_sample_s": 60,
+    "wet_threshold": 1500,
+    "wet_hyst": 40,
+    "wet_polarity": 0,
+    "server_ip": "10.0.0.1",
+    "server_port": 5683,
+    "quiet_start_h": 255,
+    "quiet_end_h": 255,
+    "alert_frost_dC": -10,
+    "low_batt_mv": 3300,
+    "apn": "iot.test1",
+    "bands": [
+     20,
+     8
+    ],
+    "plmn": 22098
+   }
+  },
+  {
+   "name": "server, silenzio notturno, bagnatura, batteria",
+   "tlv": "07062e65070933160802160503021e00050232000601010a02e40c",
+   "version": 9,
+   "result": "ok",
+   "config": {
+    "version": 9,
+    "interval_min": 10,
+    "send_every": 6,
+    "wet_sample_s": 30,
+    "wet_threshold": 1500,
+    "wet_hyst": 50,
+    "wet_polarity": 1,
+    "server_ip": "46.101.7.9",
+    "server_port": 5683,
+    "quiet_start_h": 22,
+    "quiet_end_h": 5,
+    "alert_frost_dC": 10,
+    "low_batt_mv": 3300,
+    "apn": "iot.1nce.net",
+    "bands": [
+     8,
+     20
+    ],
+    "plmn": 0
+   }
+  },
+  {
+   "name": "vuota",
+   "tlv": "",
+   "version": 10,
+   "result": "ok",
+   "config": {
+    "version": 10,
+    "interval_min": 10,
+    "send_every": 6,
+    "wet_sample_s": 60,
+    "wet_threshold": 1500,
+    "wet_hyst": 40,
+    "wet_polarity": 0,
+    "server_ip": "10.0.0.1",
+    "server_port": 5683,
+    "quiet_start_h": 255,
+    "quiet_end_h": 255,
+    "alert_frost_dC": 10,
+    "low_batt_mv": 3300,
+    "apn": "iot.1nce.net",
+    "bands": [
+     8,
+     20
+    ],
+    "plmn": 0
+   }
+  },
+  {
+   "name": "intervallo zero rifiutato",
+   "tlv": "010100",
+   "version": 11,
+   "result": "range"
+  },
+  {
+   "name": "banda non supportata rifiuta tutto",
+   "tlv": "0101050c0107",
+   "version": 12,
+   "result": "range"
+  },
+  {
+   "name": "APN con virgola",
+   "tlv": "0b04612c6263",
+   "version": 13,
+   "result": "range"
+  },
+  {
+   "name": "silenzio con una sola ora",
+   "tlv": "080216ff",
+   "version": 14,
+   "result": "range"
+  },
+  {
+   "name": "tag sconosciuto",
+   "tlv": "630100",
+   "version": 15,
+   "result": "format"
+  },
+  {
+   "name": "TLV troncato",
+   "tlv": "040210",
+   "version": 16,
+   "result": "format"
+  },
+  {
+   "name": "operatore forzato a 5 cifre",
+   "tlv": "0d0439300000",
+   "version": 17,
+   "result": "ok",
+   "config": {
+    "version": 17,
+    "interval_min": 10,
+    "send_every": 6,
+    "wet_sample_s": 60,
+    "wet_threshold": 1500,
+    "wet_hyst": 40,
+    "wet_polarity": 0,
+    "server_ip": "10.0.0.1",
+    "server_port": 5683,
+    "quiet_start_h": 255,
+    "quiet_end_h": 255,
+    "alert_frost_dC": 10,
+    "low_batt_mv": 3300,
+    "apn": "iot.1nce.net",
+    "bands": [
+     8,
+     20
+    ],
+    "plmn": 12345
+   }
+  },
+  {
+   "name": "operatore troppo corto",
+   "tlv": "0d04e7030000",
+   "version": 18,
+   "result": "range"
+  }
+ ]
+}
