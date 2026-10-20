@@ -5,6 +5,7 @@ import { configDefaults } from "@vinai/protocol";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
+import { orgToday } from "../../agro/view.js";
 import { listFleet, stationDetail } from "../../console/fleet.js";
 import { encryptDeviceKey, newDeviceKey } from "../../lib/keys.js";
 import { createInvitation, ORG_ROLES } from "../../orgs/invitations.js";
@@ -152,6 +153,62 @@ export function consoleRoutes(d: ApiDeps) {
     } catch (e) {
       throw new HTTPException(400, { message: (e as Error).message });
     }
+  });
+
+  // ---------------------------------------------------------------- panoramica del rivenditore
+  // Per ogni azienda cliente: vigneti da trattare e da controllare, centraline con problemi, ultimo dato.
+  r.get("/overview", async (c) => {
+    requireGlobal(c, "admin", "tecnico");
+    const now = d.now().getTime();
+    const orgs = await sql<
+      { id: string; name: string; region: string | null; province: string | null; members: number }[]
+    >`
+      SELECT o.id, o.name, o.region, o.province,
+             (SELECT count(*)::int FROM membership m WHERE m.organization_id = o.id) AS members
+      FROM organization o WHERE o.suspended_at IS NULL ORDER BY o.name`;
+    const fleet = await listFleet(sql, new Date(now));
+    const rows = await Promise.all(
+      orgs.map(async (o) => {
+        const today = await orgToday(sql, d.forecast, o.id, now);
+        const st = fleet.filter((f) => f.organization?.id === o.id && f.status !== "dismessa");
+        const count = (a: string) => today.vineyards.filter((v) => v.advice.action === a).length;
+        const lastData =
+          st
+            .map((f) => f.lastSeenAt)
+            .filter((x): x is string => Boolean(x))
+            .sort()
+            .at(-1) ?? null;
+        return {
+          ...o,
+          vineyards: today.vineyards.length,
+          treat: count("tratta"),
+          check: count("controlla"),
+          ok: count("ok"),
+          firstTreat: today.vineyards.find((v) => v.advice.action === "tratta")?.name ?? null,
+          stations: st.length,
+          stationProblems: st.filter((f) =>
+            ["muta", "sensore_guasto", "batteria_bassa", "in_ritardo"].includes(f.status),
+          ).length,
+          neverSeen: st.filter((f) => f.status === "mai_collegata").length,
+          lastData,
+        };
+      }),
+    );
+    rows.sort(
+      (a, b) => b.treat - a.treat || b.stationProblems - a.stationProblems || a.name.localeCompare(b.name),
+    );
+    return c.json({
+      generatedAt: new Date(now).toISOString(),
+      totals: {
+        organizations: rows.length,
+        vineyards: rows.reduce((a, r) => a + r.vineyards, 0),
+        treat: rows.reduce((a, r) => a + r.treat, 0),
+        stations: fleet.filter((f) => f.status !== "dismessa").length,
+        stationProblems: rows.reduce((a, r) => a + r.stationProblems, 0),
+        unassigned: fleet.filter((f) => !f.organization && f.status !== "dismessa").length,
+      },
+      organizations: rows,
+    });
   });
 
   // ---------------------------------------------------------------- aziende

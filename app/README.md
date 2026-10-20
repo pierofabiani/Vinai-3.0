@@ -8,10 +8,13 @@ Una sola web app: area utenti (PWA) e area `/console` per amministratore e tecni
 | --- | --- |
 | `/accesso` | collegamento via email o passkey |
 | `/invito/:token` | invito a un'azienda; entrando con il collegamento si accetta da solo |
-| `/` | elenco provvisorio delle proprie centraline (la schermata "Oggi" arriva in P4) |
+| `/` | ingresso: con un'azienda si va dritti al suo Oggi, con più aziende si sceglie |
+| `/a/:azienda` | **Oggi**: la frase-risposta, i vigneti dal più urgente con la linea della protezione, quando trattare e la pioggia dei prossimi giorni |
+| `/a/:azienda/vigneto/:id` | **Vigneto**: protezione, perché del rischio, 7 giorni e 3 di previsione, trattamenti, osservazioni da confermare, centraline |
 | `/profilo` | nome, passkey (aggiungi, rimuovi), uscita |
 | `/c/:imei` | installazione dal QR sul telefono del tecnico: azienda, vigneto, posizione GPS, foto, nota |
-| `/console` | flotta: filtri per stato, mappa, tabella |
+| `/console` | **Panoramica** del rivenditore: clienti dal più urgente, accesso alla loro area |
+| `/console/flotta` | flotta: filtri per stato, mappa, tabella |
 | `/console/centraline/:id` | scheda: dati, grafici di 7 giorni, configurazione remota, pacchetti, registro di laboratorio, QR |
 | `/console/laboratorio` | registrazione delle schede (chiave mostrata una volta), collaudo, etichette con QR (`/console/etichette`) |
 | `/console/aziende` | aziende, persone, inviti, vigneti |

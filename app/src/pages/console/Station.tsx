@@ -123,7 +123,7 @@ export function Station() {
   return (
     <>
       <Link
-        to="/console"
+        to="/console/flotta"
         className="no-print mb-4 inline-flex items-center gap-1.5 text-sm text-ink-2 hover:text-ink"
       >
         <ArrowLeft className="size-4" aria-hidden /> Flotta

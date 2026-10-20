@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import type { GlobalRole } from "../auth/auth.js";
 import type { ApiDeps, AppEnv } from "./context.js";
+import { agroRoutes } from "./routes/agro.js";
 import { consoleRoutes } from "./routes/console.js";
 import { userRoutes } from "./routes/user.js";
 
@@ -40,6 +41,7 @@ export function createApp(d: ApiDeps) {
   });
 
   app.route("/", userRoutes(d));
+  app.route("/", agroRoutes(d));
   app.route("/console", consoleRoutes(d));
   return app;
 }

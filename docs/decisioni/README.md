@@ -13,3 +13,4 @@ Ogni nota dice cosa abbiamo scelto, perché e cosa comporta. Una scelta che camb
 | 0007 | [Stack della piattaforma: TypeScript, PostgreSQL + TimescaleDB, una web app con due aree](0007-stack-piattaforma.md) (proposta) | 2026-10-19 |
 | 0008 | [Regole dell'ingest e schema delle misure](0008-regole-ingest.md) | 2026-10-19 |
 | 0009 | [Accesso con Better Auth, aziende e inviti in tabelle nostre](0009-accesso-e-aziende.md) | 2026-10-19 |
+| 0010 | [Area clienti con un modello d'esempio dichiarato](0010-area-clienti-e-modello-esempio.md) | 2026-10-20 |

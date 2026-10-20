@@ -73,7 +73,49 @@ try {
       WHERE id = ${s.id}`;
     i++;
   }
-  console.log(`[demo] ${ORGS.length} aziende, ${vineyards.length} vigneti, ${i} centraline installate`);
+  // trattamenti d'esempio: uno per vigneto, tra 2 e 9 giorni fa, se non ce ne sono già
+  const PRODUCTS = [
+    { product: "Rame idrossido", target: "peronospora", cover: 8 },
+    { product: "Zolfo bagnabile", target: "oidio", cover: 7 },
+    { product: "Poltiglia bordolese", target: "peronospora", cover: 9 },
+  ];
+  let treated = 0;
+  for (const [k, v] of vineyards.entries()) {
+    const [has] = await sql`SELECT 1 FROM treatment WHERE vineyard_id = ${v.id} LIMIT 1`;
+    if (has) continue;
+    const p = PRODUCTS[k % PRODUCTS.length] ?? PRODUCTS[0];
+    if (!p) continue;
+    const daysAgo = 2 + ((k * 3) % 8);
+    await sql`INSERT INTO treatment (vineyard_id, applied_at, product, target, cover_days, note)
+              VALUES (${v.id}, now() - make_interval(days => ${daysAgo}), ${p.product}, ${p.target}, ${p.cover},
+                      'trattamento d''esempio (dati dimostrativi)')`;
+    treated++;
+  }
+
+  // un titolare dimostrativo per la prima azienda: per vedere l'app come la vede un cliente
+  const email = "titolare.demo@example.com";
+  const [firstOrg] = await sql<{ id: string }[]>`SELECT id FROM organization WHERE name = ${ORGS[0].name}`;
+  let [u] = await sql<{ id: string }[]>`SELECT id FROM "user" WHERE email = ${email}`;
+  if (!u) {
+    [u] = await sql<{ id: string }[]>`
+      INSERT INTO "user" (id, name, email, "emailVerified", role, "createdAt", "updatedAt")
+      VALUES (gen_random_uuid()::text, 'Titolare demo', ${email}, false, 'user', now(), now()) RETURNING id`;
+  }
+  if (u && firstOrg)
+    await sql`INSERT INTO membership (organization_id, user_id, role) VALUES (${firstOrg.id}, ${u.id}, 'titolare')
+              ON CONFLICT DO NOTHING`;
+
+  // un vigneto senza centralina: per vedere come l'app lo mostra
+  if (firstOrg) {
+    const [has] =
+      await sql`SELECT 1 FROM vineyard WHERE organization_id = ${firstOrg.id} AND name = 'Vigna Nuova'`;
+    if (!has)
+      await sql`INSERT INTO vineyard (organization_id, name, variety, planting_year)
+                VALUES (${firstOrg.id}, 'Vigna Nuova', 'Sangiovese', 2024)`;
+  }
+  console.log(
+    `[demo] ${ORGS.length} aziende, ${vineyards.length} vigneti, ${i} centraline installate, ${treated} trattamenti d'esempio, titolare demo: ${email}`,
+  );
 } finally {
   await sql.end();
 }

@@ -5,7 +5,8 @@ import { CampoToggle } from "../../components/CampoToggle";
 import { isAdmin, useMe } from "../../lib/session";
 
 const NAV: { to: string; label: string; admin?: boolean }[] = [
-  { to: "/console", label: "Flotta" },
+  { to: "/console", label: "Panoramica" },
+  { to: "/console/flotta", label: "Flotta" },
   { to: "/console/laboratorio", label: "Laboratorio" },
   { to: "/console/aziende", label: "Aziende" },
   { to: "/console/utenti", label: "Utenti", admin: true },

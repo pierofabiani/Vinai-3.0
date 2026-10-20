@@ -313,6 +313,98 @@ describe("laboratorio e installazione", () => {
   });
 });
 
+describe("area clienti", () => {
+  it("il titolare vede l'Oggi della sua azienda con fonti e modello dichiarati", async () => {
+    const r = await call(`/api/orgs/${orgId}/today`, { cookie: owner });
+    expect(r.status).toBe(200);
+    expect(r.json.role).toBe("titolare");
+    expect(r.json.sources.forecast).toBe("previsione simulata");
+    expect(r.json.model.name).toBe("esempio-0");
+    const v = r.json.vineyards.find((x: { id: string }) => x.id === vineyardId);
+    expect(v.forecast).toHaveLength(72);
+    expect(["tratta", "controlla", "ok"]).toContain(v.advice.action);
+  });
+
+  it("il titolare registra un trattamento, e la protezione compare", async () => {
+    const r = await call(`/api/vineyards/${vineyardId}/treatments`, {
+      cookie: owner,
+      body: {
+        appliedAt: new Date(Date.now() - 86_400_000).toISOString(),
+        product: "Rame idrossido",
+        target: "peronospora",
+        coverDays: 8,
+      },
+    });
+    expect(r.status).toBe(201);
+    const d = await call(`/api/vineyards/${vineyardId}`, { cookie: owner });
+    expect(d.json.vineyard.protection).toMatchObject({ product: "Rame idrossido", coverDays: 8 });
+    expect(d.json.treatments).toHaveLength(1);
+  });
+
+  it("un trattamento nel futuro è rifiutato", async () => {
+    const r = await call(`/api/vineyards/${vineyardId}/treatments`, {
+      cookie: owner,
+      body: {
+        appliedAt: new Date(Date.now() + 3 * 86_400_000).toISOString(),
+        product: "Rame",
+        target: "peronospora",
+        coverDays: 8,
+      },
+    });
+    expect(r.status).toBe(400);
+  });
+
+  it("chi non è dell'azienda non vede né scrive", async () => {
+    const agr = await login("agronomo@prova.it");
+    const other = await call("/api/console/organizations", {
+      cookie: admin,
+      body: { name: "Azienda Estranea" },
+    });
+    const v = await call(`/api/console/organizations/${other.json.id}/vineyards`, {
+      cookie: admin,
+      body: { name: "Vigna Estranea" },
+    });
+    expect((await call(`/api/orgs/${other.json.id}/today`, { cookie: agr })).status).toBe(403);
+    expect((await call(`/api/vineyards/${v.json.id}`, { cookie: agr })).status).toBe(403);
+    expect(
+      (
+        await call(`/api/vineyards/${v.json.id}/observations`, {
+          cookie: agr,
+          body: { observedAt: new Date().toISOString(), disease: "oidio", severity: 1 },
+        })
+      ).status,
+    ).toBe(403);
+  });
+
+  it("l'agronomo segnala e conferma un'osservazione nella sua azienda", async () => {
+    const agr = await login("agronomo@prova.it");
+    const o = await call(`/api/vineyards/${vineyardId}/observations`, {
+      cookie: owner,
+      body: {
+        observedAt: new Date().toISOString(),
+        disease: "peronospora",
+        severity: 2,
+        phenology: "fioritura",
+      },
+    });
+    expect(o.status).toBe(201);
+    expect(
+      (await call(`/api/observations/${o.json.id}/validate`, { cookie: agr, method: "POST" })).status,
+    ).toBe(200);
+    const d = await call(`/api/vineyards/${vineyardId}`, { cookie: agr });
+    expect(d.json.observations[0]).toMatchObject({ disease: "peronospora", severity: 2 });
+    expect(d.json.observations[0].validated_at).toBeTruthy();
+  });
+
+  it("la panoramica del rivenditore conta vigneti e centraline per azienda", async () => {
+    const r = await call("/api/console/overview", { cookie: admin });
+    expect(r.status).toBe(200);
+    const o = r.json.organizations.find((x: { id: string }) => x.id === orgId);
+    expect(o).toMatchObject({ vineyards: 1, stations: 1 });
+    expect((await call("/api/console/overview", { cookie: owner })).status).toBe(403);
+  });
+});
+
 describe("utenti e registro", () => {
   it("un utente sospeso perde subito l'accesso", async () => {
     const users = await call("/api/console/users", { cookie: admin });

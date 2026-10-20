@@ -6,10 +6,13 @@ import {
   Navigate,
   Outlet,
   useLocation,
+  useNavigate,
 } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import { Skeleton } from "./components/ui";
 import { isStaff, useMe } from "./lib/session";
+import { Oggi } from "./pages/cliente/Oggi";
+import { Vigneto } from "./pages/cliente/Vigneto";
 import { Audit } from "./pages/console/Audit";
 import { Fleet } from "./pages/console/Fleet";
 import { Lab } from "./pages/console/Lab";
@@ -18,6 +21,7 @@ import { ConsoleLayout } from "./pages/console/Layout";
 import { Org } from "./pages/console/Org";
 import { Orgs } from "./pages/console/Orgs";
 import { Outbox } from "./pages/console/Outbox";
+import { Overview } from "./pages/console/Overview";
 import { Station } from "./pages/console/Station";
 import { Users } from "./pages/console/Users";
 import { Home } from "./pages/Home";
@@ -32,8 +36,28 @@ function RequireUser({ children, staff }: { children: ReactNode; staff?: boolean
   const loc = useLocation();
   if (me.isPending) return <Skeleton className="m-6 h-40" />;
   if (!me.data?.user) return <Navigate to="/accesso" search={{ next: loc.href }} />;
-  if (staff && !isStaff(me.data)) return <Navigate to="/" />;
+  if (staff && !isStaff(me.data)) {
+    const only = me.data.memberships.length === 1 ? me.data.memberships[0] : undefined;
+    return <LeaveConsole orgId={only?.organizationId} />;
+  }
   return <>{children}</>;
+}
+
+/**
+ * Un cliente che apre la console va alla sua area. Si naviga una volta sola, dentro un effetto:
+ * con <Navigate> la rotta della console restava montata e ripeteva la navigazione a ogni disegno,
+ * bloccando la pagina.
+ */
+function LeaveConsole({ orgId }: { orgId: string | undefined }) {
+  const navigate = useNavigate();
+  const done = useRef(false);
+  useEffect(() => {
+    if (done.current) return;
+    done.current = true;
+    if (orgId) void navigate({ to: "/a/$orgId", params: { orgId }, replace: true });
+    else void navigate({ to: "/", replace: true });
+  }, [navigate, orgId]);
+  return <Skeleton className="m-6 h-40" />;
 }
 
 const root = createRootRoute({ component: () => <Outlet /> });
@@ -63,6 +87,24 @@ const profile = createRoute({
     </RequireUser>
   ),
 });
+const oggi = createRoute({
+  getParentRoute: () => root,
+  path: "/a/$orgId",
+  component: () => (
+    <RequireUser>
+      <Oggi />
+    </RequireUser>
+  ),
+});
+const vigneto = createRoute({
+  getParentRoute: () => root,
+  path: "/a/$orgId/vigneto/$id",
+  component: () => (
+    <RequireUser>
+      <Vigneto />
+    </RequireUser>
+  ),
+});
 const install = createRoute({
   getParentRoute: () => root,
   path: "/c/$imei",
@@ -82,7 +124,8 @@ const consoleRoute = createRoute({
     </RequireUser>
   ),
 });
-const fleet = createRoute({ getParentRoute: () => consoleRoute, path: "/", component: Fleet });
+const overview = createRoute({ getParentRoute: () => consoleRoute, path: "/", component: Overview });
+const fleet = createRoute({ getParentRoute: () => consoleRoute, path: "/flotta", component: Fleet });
 const station = createRoute({
   getParentRoute: () => consoleRoute,
   path: "/centraline/$id",
@@ -160,7 +203,9 @@ const routeTree = root.addChildren([
   home,
   profile,
   install,
-  consoleRoute.addChildren([fleet, station, lab, labels, orgs, org, users, audit, outbox]),
+  oggi,
+  vigneto,
+  consoleRoute.addChildren([overview, fleet, station, lab, labels, orgs, org, users, audit, outbox]),
 ]);
 
 export const router = createRouter({ routeTree, defaultPreload: "intent" });

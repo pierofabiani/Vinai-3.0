@@ -1,6 +1,7 @@
 // Montaggio dei servizi dell'api a partire dall'ambiente: database, posta, autenticazione.
 import { resolve } from "node:path";
 import pg from "pg";
+import { simulatedForecast } from "../agro/forecast.js";
 import { createAuth } from "../auth/auth.js";
 import { connect, dbStatus, type Sql } from "../lib/db.js";
 import type { Env } from "../lib/env.js";
@@ -62,6 +63,7 @@ export function buildServices(env: Env, opts: { sql?: Sql; mailer?: Mailer } = {
     uploadDir: resolve(env.UPLOAD_DIR),
     defaultServerIp: env.STATION_SERVER_IP,
     now: () => new Date(),
+    forecast: simulatedForecast,
     dbStatus: () => dbStatus(sql),
   };
   const close = async () => {

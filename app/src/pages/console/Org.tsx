@@ -80,7 +80,18 @@ export function Org() {
       >
         <ArrowLeft className="size-4" aria-hidden /> Aziende
       </Link>
-      <PageHeader title={o.name} />
+      <PageHeader
+        title={o.name}
+        actions={
+          <Link
+            to="/a/$orgId"
+            params={{ orgId: o.id }}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent px-4 text-sm font-semibold text-accent-ink"
+          >
+            Apri l'area cliente
+          </Link>
+        }
+      />
       <Facts
         items={[
           ["Zona", [o.province, o.region].filter(Boolean).join(", ") || "—"],

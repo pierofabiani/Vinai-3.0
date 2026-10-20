@@ -42,6 +42,16 @@
   --series-wash: color-mix(in oklch, #5b97d3 16%, transparent);
   --grid: oklch(0.3 0.03 238);
   --shadow: 0 10px 28px -14px oklch(0 0 0 / 0.6);
+  /* grafico del tempo (TimeChart): temperatura in inchiostro, bagnatura nella serie, pioggia in acqua */
+  --tc-ink: var(--ink);
+  --tc-muted: var(--ink-3);
+  --tc-grid: var(--grid);
+  --tc-bg: var(--bg);
+  --tc-now: var(--ink);
+  --tc-forecast: oklch(1 0 0 / 0.04);
+  --c-temp: var(--ink-2);
+  --c-wet: var(--series);
+  --c-rain: var(--water);
 }
 
 :root[data-campo="true"] {
@@ -68,6 +78,7 @@
   --warn-row: color-mix(in oklab, var(--panel) 88%, var(--warn));
   --series: #1f6cb0;
   --series-wash: color-mix(in oklch, #1f6cb0 12%, transparent);
+  --tc-forecast: oklch(0.3 0.03 240 / 0.05);
   --grid: oklch(0.9 0.012 220);
   --shadow: 0 10px 28px -16px oklch(0.3 0.03 240 / 0.35);
 }
@@ -182,4 +193,78 @@ select {
     background: white;
     color: black;
   }
+}
+
+/* grafico del tempo dell'area clienti (components/TimeChart.tsx) */
+.tc {
+  margin: 0;
+}
+.tc-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.tc-title {
+  font-weight: 650;
+}
+.tc-toggle {
+  font-size: 13px;
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.tc-plot {
+  position: relative;
+}
+.tc-plot svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  font-family: inherit;
+}
+.tc-tip {
+  position: absolute;
+  top: 18px;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 1px;
+  padding: 6px 9px;
+  font-size: 12.5px;
+  white-space: nowrap;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+  box-shadow: 0 8px 20px -12px oklch(0 0 0 / 0.45);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.tc-table {
+  max-height: 260px;
+  overflow: auto;
+  margin-top: 8px;
+  font-size: 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
+}
+.tc-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.tc-table th,
+.tc-table td {
+  padding: 4px 8px;
+  text-align: right;
+  border-top: 1px solid var(--line-soft);
+  white-space: nowrap;
+}
+.tc-table th:first-child,
+.tc-table td:first-child {
+  text-align: left;
+}
+.tc-fc {
+  color: var(--ink-3);
 }

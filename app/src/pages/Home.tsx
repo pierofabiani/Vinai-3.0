@@ -1,39 +1,17 @@
-// Pagina iniziale provvisoria per chi usa le centraline: elenco delle proprie centraline.
-// La schermata vera ("Oggi": devo trattare, e dove?) arriva in P4, dopo il design.
-import { useQueries } from "@tanstack/react-query";
+// Ingresso dell'area clienti: con una sola azienda si va dritti al suo "Oggi"; con più aziende
+// (per esempio un agronomo) si sceglie; tecnici e amministratori vanno alla console.
 import { Link, Navigate } from "@tanstack/react-router";
-import { User } from "lucide-react";
+import { ChevronRight, User } from "lucide-react";
 import { CampoToggle } from "../components/CampoToggle";
-import { Empty, Panel, SkeletonRows, StatusLabel } from "../components/ui";
-import { api } from "../lib/api";
-import { ago, num } from "../lib/format";
+import { Empty, Skeleton } from "../components/ui";
 import { isStaff, useMe } from "../lib/session";
-import type { FleetStatus } from "../lib/types";
-
-interface OrgView {
-  id: string;
-  name: string;
-  role: string;
-  stations: {
-    id: number;
-    label: string | null;
-    status: FleetStatus;
-    vineyard: { name: string } | null;
-    lastSeenAt: string | null;
-    last: { tempC: number | null; humPct: number | null; wetMin: number } | null;
-  }[];
-}
 
 export function Home() {
   const me = useMe();
-  const orgs = useQueries({
-    queries: (me.data?.memberships ?? []).map((m) => ({
-      queryKey: ["org", m.organizationId],
-      queryFn: () => api<OrgView>(`/orgs/${m.organizationId}`),
-      refetchInterval: 60_000,
-    })),
-  });
+  if (me.isPending) return <Skeleton className="m-6 h-40" />;
   if (me.data && isStaff(me.data)) return <Navigate to="/console" />;
+  const ms = me.data?.memberships ?? [];
+  if (ms.length === 1 && ms[0]) return <Navigate to="/a/$orgId" params={{ orgId: ms[0].organizationId }} />;
   return (
     <div>
       <header className="bg-shell text-shell-ink">
@@ -48,50 +26,34 @@ export function Home() {
           </div>
         </div>
       </header>
-      <div className="mx-auto max-w-3xl px-4 py-7">
-        {me.data?.memberships.length === 0 ? (
+      <main className="mx-auto max-w-3xl px-4 py-7">
+        {ms.length === 0 ? (
           <Empty title="Non fai ancora parte di un'azienda">
             Quando qualcuno ti invita, l'azienda compare qui.
           </Empty>
-        ) : null}
-        {orgs.map((q, i) => {
-          const m = me.data?.memberships[i];
-          return (
-            <section key={m?.organizationId} className="mb-10">
-              <h1 className="text-xl font-semibold">{m?.name}</h1>
-              <p className="mb-4 text-sm text-ink-3">Sei {m?.role}</p>
-              {q.isPending ? (
-                <SkeletonRows rows={2} />
-              ) : q.data?.stations.length ? (
-                <div className="grid gap-3">
-                  {q.data.stations.map((s) => (
-                    <Panel key={s.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                      <div>
-                        <p className="font-medium">{s.label ?? `Centralina ${s.id}`}</p>
-                        <p className="text-sm text-ink-3">
-                          {s.vineyard?.name ?? "Vigneto non indicato"} · aggiornata {ago(s.lastSeenAt)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-5 text-sm num">
-                        <span>{num(s.last?.tempC, 1, "°C")}</span>
-                        <span>{num(s.last?.humPct, 0, "%")}</span>
-                        <span title="minuti di foglia bagnata nell'ultimo intervallo">
-                          {s.last ? `${s.last.wetMin} min bagnati` : "—"}
-                        </span>
-                        <StatusLabel status={s.status} />
-                      </div>
-                    </Panel>
-                  ))}
-                </div>
-              ) : (
-                <Empty title="Nessuna centralina installata">
-                  Compariranno qui appena il tecnico le installa nei vostri vigneti.
-                </Empty>
-              )}
-            </section>
-          );
-        })}
-      </div>
+        ) : (
+          <>
+            <h1 className="mb-4 text-[1.75rem] font-bold tracking-tight">Le tue aziende</h1>
+            <ul className="grid gap-2">
+              {ms.map((m) => (
+                <li key={m.organizationId}>
+                  <Link
+                    to="/a/$orgId"
+                    params={{ orgId: m.organizationId }}
+                    className="flex items-center justify-between gap-3 rounded-xl bg-panel px-4 py-3.5 hover:bg-panel-2"
+                  >
+                    <span>
+                      <span className="block text-[17px] font-bold">{m.name}</span>
+                      <span className="text-sm text-ink-3">sei {m.role}</span>
+                    </span>
+                    <ChevronRight className="size-5 text-ink-3" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </main>
     </div>
   );
 }

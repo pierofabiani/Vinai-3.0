@@ -4,7 +4,7 @@ import { parseArgs } from "node:util";
 import { connect } from "../lib/db.js";
 import { loadEnv } from "../lib/env.js";
 import { parseMasterKey } from "../lib/keys.js";
-import { runFleet } from "./fleet.js";
+import { runFleet, runLive } from "./fleet.js";
 
 const { values } = parseArgs({
   options: {
@@ -17,11 +17,33 @@ const { values } = parseArgs({
     "no-scenarios": { type: "boolean", default: false },
     seed: { type: "string", default: "42" },
     "imei-base": { type: "string" },
+    live: { type: "boolean", default: false },
   },
 });
 
 const env = loadEnv();
 const sql = connect(env.DATABASE_URL);
+if (values.live) {
+  // dal vivo: recupera le ore perse e continua in tempo reale finché non si ferma (Ctrl+C)
+  const stop = new AbortController();
+  process.once("SIGINT", () => stop.abort());
+  process.once("SIGTERM", () => stop.abort());
+  await runLive({
+    sql,
+    master: parseMasterKey(env.STATION_KEY_SECRET),
+    host: values.host,
+    port: Number(values.port ?? env.COAP_PORT),
+    stations: Number(values.stations),
+    uplinkLoss: Number(values.loss),
+    ackLoss: Number(values["ack-loss"]),
+    seed: Number(values.seed),
+    ...(values["imei-base"] ? { imeiBase: BigInt(values["imei-base"]) } : {}),
+    signal: stop.signal,
+    log: (m) => console.log(`[sim] ${m}`),
+  });
+  await sql.end();
+  process.exit(0);
+}
 try {
   const report = await runFleet({
     sql,

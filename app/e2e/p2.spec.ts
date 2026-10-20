@@ -3,12 +3,18 @@ import { expect, test } from "@playwright/test";
 import { ADMIN, freshImei, lastLink, loginWithLink, shot, sql } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
-test.afterAll(async () => sql.end());
 
 const run = Date.now().toString(36);
 const OWNER = `titolare-${run}@prova.it`;
 const ORG = `Azienda Prova ${run}`;
 const IMEI = freshImei();
+
+// la prova crea un'azienda, una centralina e un titolare: alla fine si tolgono, i dati di sviluppo restano puliti
+test.afterAll(async () => {
+  await sql`DELETE FROM station WHERE imei = ${IMEI}`;
+  await sql`DELETE FROM organization WHERE name = ${ORG}`;
+  await sql`DELETE FROM "user" WHERE email = ${OWNER}`;
+});
 
 test("l'amministratore entra con il collegamento e vede la flotta", async ({ page }) => {
   expect(ADMIN, "BOOTSTRAP_ADMIN_EMAIL in .env").not.toBe("");
@@ -16,6 +22,10 @@ test("l'amministratore entra con il collegamento e vede la flotta", async ({ pag
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
   await loginWithLink(page, ADMIN);
   await expect(page).toHaveURL(/\/console$/);
+  // la console si apre sulla panoramica dei clienti; la flotta è nella sua scheda
+  await expect(page.getByRole("link", { name: "Panoramica" })).toBeVisible();
+  await page.getByRole("link", { name: "Flotta", exact: true }).click();
+  await expect(page).toHaveURL(/\/console\/flotta$/);
   await expect(page.getByRole("heading", { level: 1, name: /stanno bene|da controllare/ })).toBeVisible();
   await expect(page.getByText(/in servizio · aggiornato ogni 30 secondi/)).toBeVisible();
   await expect(page.locator("tbody tr").first()).toBeVisible();
@@ -31,9 +41,9 @@ test.describe("da amministratore", () => {
   test.use({ storageState: "e2e/.admin.json", viewport: { width: 1440, height: 900 } });
 
   test("scheda della centralina con grafici e configurazione", async ({ page }) => {
-    await page.goto("/console");
-    // la prima riga non dismessa: lo stato dipende dall'ora, il test no
-    await page.locator("tbody tr").first().click();
+    await page.goto("/console/flotta");
+    // una centralina del simulatore: ha sempre dati, qualunque sia il suo stato
+    await page.locator("tbody tr", { hasText: "Simulatore" }).first().click();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByText("Temperatura, media oraria con minimo e massimo")).toBeVisible();
     await expect(page.locator(".uplot")).toHaveCount(5);
@@ -109,7 +119,7 @@ test.describe("da amministratore", () => {
       isMobile: true,
     });
     const page = await ctx.newPage();
-    await page.goto("/console");
+    await page.goto("/console/flotta");
     await expect(page.getByRole("listitem").first()).toBeVisible();
     await page.waitForTimeout(1200);
     await shot(page, "06-flotta-375");
@@ -131,8 +141,9 @@ test("il titolare entra dall'invito, aggiunge una passkey ed entra con quella", 
   await page.getByRole("button", { name: "Ricevi il collegamento per entrare" }).click();
   await expect(page.getByRole("status")).toContainText(OWNER);
   await page.goto(await lastLink(OWNER, t));
-  await expect(page.getByRole("heading", { name: ORG })).toBeVisible();
-  await expect(page.getByText("Sei titolare")).toBeVisible();
+  // con una sola azienda il titolare arriva dritto al suo "Oggi"
+  await expect(page).toHaveURL(/\/a\/[0-9a-f-]+$/);
+  await expect(page.getByText(ORG)).toBeVisible();
 
   // passkey con un autenticatore virtuale (come l'impronta del telefono)
   const cdp = await context.newCDPSession(page);
@@ -153,5 +164,6 @@ test("il titolare entra dall'invito, aggiunge una passkey ed entra con quella", 
   await page.getByRole("button", { name: "Esci" }).click();
   await expect(page).toHaveURL(/\/accesso/);
   await page.getByRole("button", { name: "Entra con passkey" }).click();
-  await expect(page.getByRole("heading", { name: ORG })).toBeVisible();
+  await expect(page).toHaveURL(/\/a\/[0-9a-f-]+$/);
+  await expect(page.getByText(ORG)).toBeVisible();
 });

@@ -11,7 +11,7 @@ Le centraline sono le schede **Hive Rev 1.1** già prodotte (PIC24FJ256GA704, mo
 | [`firmware/`](firmware/) | firmware della centralina, in C, con test sul PC | struttura e moduli core scritti e testati; parte legata alla scheda da completare al banco |
 | [`server/`](server/) | ricezione dei pacchetti CoAP, API, console di gestione (TypeScript) | P2: ingest, accesso (Better Auth), aziende e inviti, API della console |
 | [`packages/protocol/`](packages/protocol/) | codec del protocollo in TypeScript, verificato sui vettori del firmware | P1: completo |
-| [`app/`](app/) | PWA per gli utenti e console (TypeScript, React) | P2: accesso, inviti, console (flotta, scheda, laboratorio, aziende, utenti), installazione da QR; aspetto provvisorio fino a P3 |
+| [`app/`](app/) | PWA per i clienti e console (TypeScript, React) | P4: area clienti (Oggi, Vigneto, trattamenti, osservazioni), console con panoramica del rivenditore, flotta, laboratorio, aziende; mondo Verderame |
 | [`models/`](models/) | modelli delle malattie e AI (Python) | da iniziare, con l'agronomo |
 | [`infra/`](infra/) | server, backup, monitoraggio | da iniziare |
 | [`docs/`](docs/) | architettura, piano, note di decisione | avviato |
@@ -40,7 +40,10 @@ Primo accesso: in `.env` metti la tua email in `BOOTSTRAP_ADMIN_EMAIL`, apri `/a
 ```
 pnpm --filter @vinai/server sim --stations 20 --days 3 --imei-base 992000000000000
 pnpm --filter @vinai/server seed:demo --imei-base 992000000000000
+pnpm --filter @vinai/server sim --live --stations 20 --imei-base 992000000000000   # dati in tempo reale, finché non si ferma
 ```
+
+Il titolare dimostrativo è `titolare.demo@example.com`: si entra col collegamento letto dalla posta di prova. L'amministratore apre l'area di ogni cliente dalla Panoramica della console.
 
 Per il design si usa la skill [Impeccable](https://github.com/pbakaus/impeccable), già nel repository in `.claude/skills/`. Per attivarne gli hook sul proprio computer: `npx impeccable install --providers=claude --scope=project`.
 

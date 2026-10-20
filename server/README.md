@@ -11,10 +11,11 @@ Piano dettagliato, stack e fasi: [`docs/piattaforma.md`](../docs/piattaforma.md)
 | `src/ingest` | CoAP su UDP 5683, `POST /m`: salva il pacchetto grezzo, verifica la firma, salva misure e salute in una transazione, risponde con conferma firmata, ora del server ed eventuale configurazione. Errori: `4.00` formato, `4.01` sconosciuta o firma, `5.03` database |
 | `src/auth` | Better Auth: collegamento via email, passkey, sessioni, ruoli globali; registrazione chiusa (nota 0009) |
 | `src/orgs` | inviti alle aziende (token con impronta, 7 giorni), accettazione al primo accesso |
-| `src/api` | `/api/auth/*`, `/api/me`, inviti, `/api/orgs/:id`, installazione da QR (`/api/install/:imei`), console (`/api/console/*`: flotta, scheda, laboratorio, configurazione, aziende, vigneti, utenti, registro, posta di prova) |
+| `src/api` | `/api/auth/*`, `/api/me`, inviti, `/api/orgs/:id`, installazione da QR (`/api/install/:imei`), area clienti (`/api/orgs/:id/today`, `/api/vineyards/:id`, trattamenti, osservazioni), console (`/api/console/*`: panoramica, flotta, scheda, laboratorio, configurazione, aziende, vigneti, utenti, registro, posta di prova) |
+| `src/agro` | modello d'esempio (rischio, protezione residua, consiglio, finestra asciutta), previsioni simulate, viste Oggi e Vigneto (nota 0010) |
 | `src/console` | stato della flotta (attiva, in ritardo, muta da 3 ore, batteria bassa, sensore guasto, mai collegata) e scheda della centralina |
 | `src/stations` | provisioning (chiave cifrata con `STATION_KEY_SECRET`), configurazioni remote versionate, controllo dell'IMEI |
-| `migrations/` | 0001 misure (TimescaleDB), 0002 tabelle di Better Auth, 0003 aziende, inviti, vigneti, installazioni, registro di laboratorio e delle azioni |
+| `migrations/` | 0001 misure (TimescaleDB), 0002 tabelle di Better Auth, 0003 aziende, inviti, vigneti, installazioni, registro di laboratorio e delle azioni, 0004 trattamenti e osservazioni |
 | `src/sim` | simulatore di flotta e dati dimostrativi (`seed:demo`) |
 | `src/worker` | coda pg-boss avviata, nessun job ancora |
 

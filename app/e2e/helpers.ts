@@ -6,7 +6,8 @@ import postgres from "postgres";
 if (existsSync("../.env")) process.loadEnvFile("../.env");
 
 export const ADMIN = process.env.BOOTSTRAP_ADMIN_EMAIL ?? "";
-export const sql = postgres(process.env.DATABASE_URL ?? "", { max: 2, onnotice: () => {} });
+// condivisa tra i file di prova: non si chiude a mano, si chiude da sola quando resta inattiva
+export const sql = postgres(process.env.DATABASE_URL ?? "", { max: 2, idle_timeout: 2, onnotice: () => {} });
 export const SHOTS = process.env.E2E_SHOTS ?? "e2e/screenshots";
 
 /** Collegamento più recente arrivato nella posta di prova per questa email. */

@@ -336,3 +336,50 @@ async function verify(
     perStation,
   };
 }
+
+/**
+ * Modalità dal vivo: le centraline simulate recuperano le ore perse dall'ultima misura e poi continuano
+ * in tempo reale, come centraline vere (misura ogni 10 minuti, invio ogni ora). Gira finché non la si ferma.
+ * Serve a tenere vivi i dati dimostrativi e l'ambiente di prova.
+ */
+export async function runLive(
+  opts: Omit<FleetOptions, "days" | "scenarios"> & { signal?: AbortSignal },
+): Promise<void> {
+  const log = opts.log ?? (() => {});
+  const rand = prng(opts.seed ?? 42);
+  const fleet: SimStation[] = [];
+  for (let i = 0; i < opts.stations; i++) fleet.push(await loadOrProvision(opts as FleetOptions, i, rand));
+  const sockets = new Map(fleet.map((s) => [s.id, stationSocket(opts.host, opts.port)]));
+  const exchangeOf = (s: SimStation) => (sockets.get(s.id) as { exchange: Exchange }).exchange;
+  const lastTimes = await opts.sql<{ station_id: string; t: Date }[]>`
+    SELECT station_id, max(time) AS t FROM measurement
+    WHERE station_id = ANY(${fleet.map((s) => s.id)}) GROUP BY station_id`;
+  const lastTime = new Map(lastTimes.map((r) => [Number(r.station_id), r.t.getTime()]));
+  const now0 = Math.floor(Date.now() / 60_000) * 60_000;
+  const from = Math.min(...fleet.map((s) => lastTime.get(s.id) ?? now0 - 86_400_000));
+  for (const s of fleet) s.start(lastTime.get(s.id) ?? now0 - 86_400_000);
+  const net = { uplinkLoss: opts.uplinkLoss, ackLoss: opts.ackLoss };
+  log(`${fleet.length} centraline dal vivo; recupero da ${new Date(from).toISOString()}`);
+  let t = from;
+  let caughtUp = false;
+  try {
+    while (!opts.signal?.aborted) {
+      const now = Math.floor(Date.now() / 60_000) * 60_000;
+      for (; t <= now; t += 60_000) {
+        const due: SimStation[] = [];
+        for (const s of fleet) {
+          if (s.dueAt(t).measure) s.measure(t);
+          if (s.dueAt(t).send) due.push(s);
+        }
+        if (due.length) await Promise.all(due.map((s) => s.session(t, net, exchangeOf(s), rand)));
+      }
+      if (!caughtUp) {
+        caughtUp = true;
+        log("recupero finito, ora in tempo reale");
+      }
+      await new Promise((r) => setTimeout(r, 20_000));
+    }
+  } finally {
+    for (const sock of sockets.values()) sock.close();
+  }
+}
