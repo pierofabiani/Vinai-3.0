@@ -35,12 +35,27 @@ function RequireUser({ children, staff }: { children: ReactNode; staff?: boolean
   const me = useMe();
   const loc = useLocation();
   if (me.isPending) return <Skeleton className="m-6 h-40" />;
-  if (!me.data?.user) return <Navigate to="/accesso" search={{ next: loc.href }} />;
+  if (!me.data?.user) return <GoTo to="/accesso" search={{ next: loc.href }} />;
   if (staff && !isStaff(me.data)) {
     const only = me.data.memberships.length === 1 ? me.data.memberships[0] : undefined;
     return <LeaveConsole orgId={only?.organizationId} />;
   }
   return <>{children}</>;
+}
+
+/**
+ * Redirect fatto in un effetto, una sola volta. Con <Navigate> dentro una rotta protetta, sul server
+ * di sviluppo la pagina restava bloccata in un ciclo di disegni (RESULT_CODE_HUNG nel browser).
+ */
+function GoTo({ to, search }: { to: string; search?: Record<string, string> }) {
+  const navigate = useNavigate();
+  const done = useRef(false);
+  useEffect(() => {
+    if (done.current) return;
+    done.current = true;
+    void navigate({ to, search, replace: true } as never);
+  }, [navigate, to, search]);
+  return <Skeleton className="m-6 h-40" />;
 }
 
 /**
