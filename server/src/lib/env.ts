@@ -11,7 +11,8 @@ const schema = z.object({
   /** indirizzo pubblico della web app: link nelle email, origine delle passkey */
   APP_URL: z.string().url().default("http://localhost:5173"),
   /** segreto delle sessioni: almeno 32 caratteri */
-  BETTER_AUTH_SECRET: z.string().min(32),
+  /** obbligatorio solo per l'api (accesso): ingest e worker non lo usano e partono anche senza */
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
   /** dev = email nella tabella dev_outbox; smtp = invio vero */
   MAILER: z.enum(["dev", "smtp"]).default("dev"),
   SMTP_URL: z.string().optional(),

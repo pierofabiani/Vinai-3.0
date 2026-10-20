@@ -10,6 +10,12 @@ import { acceptOpenInvitations, hasOpenInvitation, userExists } from "../orgs/in
 import type { ApiDeps } from "./context.js";
 
 export function buildServices(env: Env, opts: { sql?: Sql; mailer?: Mailer } = {}) {
+  if (!env.BETTER_AUTH_SECRET) {
+    throw new Error(
+      "Configurazione non valida: BETTER_AUTH_SECRET mancante (almeno 32 caratteri), serve all'api per le sessioni",
+    );
+  }
+  const secret = env.BETTER_AUTH_SECRET;
   const sql = opts.sql ?? connect(env.DATABASE_URL);
   const pool = new pg.Pool({ connectionString: env.DATABASE_URL, max: 5 });
   const mailer =
@@ -32,7 +38,7 @@ export function buildServices(env: Env, opts: { sql?: Sql; mailer?: Mailer } = {
     pool,
     mailer,
     appUrl: env.APP_URL,
-    secret: env.BETTER_AUTH_SECRET,
+    secret,
     canSignIn: async (email) =>
       (await userExists(sql, email)) ||
       (await hasOpenInvitation(sql, email)) ||
